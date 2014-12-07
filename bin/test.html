@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="jquery.js"></script>
+</head>
+<body>
+<button id="test">aassdfsdf</button>
+</body>
+<script>
+    $(function(){
+        $('#test').click(function(){
+            $.ajax({
+                url : 'http://api.ads.devel',
+                headers : {'agrs' : 'helloworld'}
+            });
+        });
+    });
+</script>
+</html>
