@@ -21,11 +21,11 @@ class AdsController extends Yaf\Controller_Abstract {
 
         if (\Core\KEY::get('_IS_AUTHORIZED')) {
 
-            $_REQUEST           = \Core\KEY::get('_REQUEST');
-            $_APP               = \Core\KEY::get('_APP');
-            $_API               = \Core\KEY::get('_API');;
-            $_RESULT            = FALSE;
-            $_RETURN_PACKEGE    = NULL;
+            $__REQUEST           = \Core\KEY::get('_REQUEST');
+            $__APP               = \Core\KEY::get('_APP');
+            $__API               = \Core\KEY::get('_API');;
+            $__RESULT            = FALSE;
+            $__RETURN_PACKEGE    = NULL;
 
 
             //API PROCESS START -->

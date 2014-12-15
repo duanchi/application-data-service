@@ -56,7 +56,7 @@ class RequestModel {
         !empty($_tmp_request_uri[1]) ? parse_str($_tmp_request_uri[1], $_tmp_ads_parameters) : $_tmp_ads_parameters = [];
 
         //CONTENT-TYPE
-        $_tmp_content_type = strtoupper(explode(ADS_DOMAIN, $_SERVER['HTTP_HOST']));
+        $_tmp_content_type = strtoupper(explode(ADS_DOMAIN, $_SERVER['HTTP_HOST'])[0]);
         if (!empty($_tmp_host[0])) {
             $_tmp_content_type = (defined('TYPE_' . $_tmp_host[0]) ? constant('TYPE_' . $_tmp_host[0]) : NULL);
         }

@@ -25,11 +25,11 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
 
     public function _initMemorySet(Yaf\Dispatcher $dispatcher) {
         //初始化预定于变量
-        Yaf\Registry::set(      '_REQUEST', NULL );
-        Yaf\Registry::set('_IS_AUTHORIZED', FALSE);
-        Yaf\Registry::set(          '_APP', FALSE);
-        Yaf\Registry::set(         '_CONF', FALSE);
-        Yaf\Registry::set(       '_RESULT', NULL );
+        Yaf\Registry::set(      '__REQUEST', NULL );
+        Yaf\Registry::set('__IS_AUTHORIZED', FALSE);
+        Yaf\Registry::set(          '__APP', FALSE);
+        Yaf\Registry::set(         '__CONF', FALSE);
+        Yaf\Registry::set(       '__RESULT', NULL );
     }
 
     public function _initPlugin(Yaf\Dispatcher $dispatcher) {
@@ -44,8 +44,8 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
     public function _initHooks(Yaf\Dispatcher $dispatcher) {
         //注册Hooks
         $dispatcher->registerPlugin(new \Hook\RequestPlugin());
-        /*$dispatcher->registerPlugin(new \Hook\AuthenticatePlugin());
-        $dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
+        $dispatcher->registerPlugin(new \Hook\AuthenticatePlugin());
+        /*$dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
         $dispatcher->registerPlugin(new \Hook\FetchDataPlugin());
         $dispatcher->registerPlugin(new \Hook\ExtraDataPlugin());
         $dispatcher->registerPlugin(new \Hook\ResponsePlugin());

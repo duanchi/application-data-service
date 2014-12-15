@@ -22,7 +22,7 @@ class AuthorizeModel {
 	 * @param string $_ip
 	 * @return Ambigous <boolean, Ambigous, multitype:>
 	 */
-	public static function authenticate($_token = NULL, $_ip = NULL) {
+	public static function authenticate($_token = NULL, $_ip = NULL, $_client_id = NULL, $_client_token = NULL) {
 		$_result = FALSE;
 
 		$_app = self::get_app(NULL, NULL, $_token);
@@ -99,7 +99,8 @@ class AuthorizeModel {
 
 		//如果是token,先找到token和 appkey的对应
 		if ($_appkey == NULL && $_token != NULL) {
-			$_token_config = parse_config(APPSECRET_CONF_FILE_PATH);
+			$_token_config = get_yaf_config(ADS_APPS_SECRET);
+            var_dump($_token_config);
 			if (!empty($_token_config)) {
 				$_appkey = (isset($_token_config['token'][$_token]) ? $_token_config['token'][$_token] : NULL);
 			}
@@ -108,7 +109,7 @@ class AuthorizeModel {
 
 		//MATCH VOP_DISABLED_APPS
 		if (!empty($_appkey) && !self::check_disabled($_appkey)) {
-			$_config = parse_config(APP_CONF_FILE_PATH . DIRECTORY_SEPARATOR .$_appkey.'.ini');
+			$_config = parse_config(ADS_APPS_CONFIG . DIRECTORY_SEPARATOR .$_appkey.'.ini');
 
 			if (!empty($_config) && !empty($_token)) {//TOKEN IS SET,THEN RETURN RESULT
 

@@ -17,9 +17,7 @@ class RequestPlugin extends \Yaf\Plugin_Abstract {
 		//PRETREATMENT REQUEST START -->
 		if ($request->controller == 'Ads') {
 
-            \Yaf\Registry::set('_REQUEST', \Process\RequestModel::get($request->method, $_SERVER['REQUEST_URI']));
-
-            \Yaf\Registry::set('_IS_AUTHORIZED', FALSE);
+            \Yaf\Registry::set('__REQUEST', \Process\RequestModel::get($request->method, $_SERVER['REQUEST_URI']));
 
         }
 		//PRETREATMENT REQUEST END <--

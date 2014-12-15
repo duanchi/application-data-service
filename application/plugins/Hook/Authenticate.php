@@ -14,22 +14,21 @@ class AuthenticatePlugin extends \Yaf\Plugin_Abstract {
 
 	public function routerShutdown(\Yaf\Request_Abstract $request, \Yaf\Response_Abstract $response) {
 
-		if ($request->controller == 'Api') {
+		if ($request->controller == 'Ads') {
 
-            $_REQUEST = \Core\KEY::get('_REQUEST');
+            $__REQUEST = \Yaf\Registry::get('__REQUEST');
 
-            \Core\KEY::set('_IS_AUTHORIZED', FALSE);
-
+            
 			//AUTHENTICATE START -->
 			//应用认证,appkey,appsecret,ip,count from authorize_config.ini
-			$_APP = \Process\AuthorizeModel::authenticate($_REQUEST['access-token'], $_REQUEST['client-ip']);
+			$__APP = \Process\AuthorizeModel::authenticate($__REQUEST['access-token'], $__REQUEST['client-ip'], $__REQUEST['client-id'], $__REQUEST['client-token']);
 
-			if (empty($_APP) || $_APP == FALSE) {
+			if (empty($__APP) || $__APP == FALSE) {
                 throw new \Exception('AUTHENTICATE_FAILURE');
             }
             else {
-                \Core\KEY::set('_IS_AUTHORIZED', TRUE);
-                \Core\KEY::set('_APP', $_APP);
+                \Yaf\Registry::set('__IS_AUTHORIZED', TRUE);
+                \Yaf\Registry::set('__APP', $__APP);
             }
 
 
