@@ -7,5 +7,5 @@
  */
 
 function get_yaf_config($_config_file) {
-	return new \Yaf\Config\Ini(APPLICATION_PATH . DIRECTORY_SEPARATOR . 'conf' . DIRECTORY_SEPARATOR . $_config_file, \Yaf\Application::app()->environ());
+	return new \Yaf\Config\Ini($_config_file, \Yaf\Application::app()->environ());
 }

@@ -12,17 +12,18 @@
 class ConstPlugin extends Yaf\Plugin_Abstract {
 
 	function __construct() {
-		//parse constant config
-		$_conf = get_yaf_config('constant.ini');
-
-		foreach ($_conf as $_property => $_value) {
-			define($_property, $_value);
-		}
 
 		//parse app path
 		$_conf = \Yaf\Registry::get('config')->get('application')->constant;
         foreach ($_conf as $_key => $_value) {
             define('ADS_' . strtoupper($_key), $_value);
+        }
+
+        //parse constant config
+        $_conf = get_yaf_config(ADS_CONSTANT_SETTINGS);
+
+        foreach ($_conf as $_property => $_value) {
+            define($_property, $_value);
         }
 
 		//parse status code config

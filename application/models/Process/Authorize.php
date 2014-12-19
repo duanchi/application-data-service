@@ -25,28 +25,19 @@ class AuthorizeModel {
 	public static function authenticate($_token = NULL, $_ip = NULL, $_client_id = NULL, $_client_token = NULL) {
 		$_result = FALSE;
 
-		$_app = self::get_app(NULL, NULL, $_token);
+		$_result = self::get_app(NULL, NULL, $_token);
 
-		if ($_app) {
-			$_appkey = $_app['authorize']['appkey'];
+		if ($_result) {
 
-			if ($_app != FALSE)
-			{
-				$_result = TRUE;
-
-				if (API_IP_BIND == TRUE) {
-					if (self::ip_match($_app, $_ip)) {
-						$_result = TRUE;
-					} else {
-						throw new \Exception('INVAILED_REQUEST_IP');
-					}
-				}
+			if (API_IP_BIND == TRUE) {
+				if (!self::ip_match($_result->appkey, $_ip)) {
+                    $_result = FALSE;
+                    throw new \Exception('INVAILED_REQUEST_IP');
+                }
 			}
-
-			$_app = (isset($_app[$_token]) ? array_merge(['appkey'=>$_appkey],$_app[$_token]) : FALSE);
 		}
 
-		return ($_result == TRUE ? $_app : FALSE);
+		return $_result;
 	}
 	
 	/**
@@ -99,29 +90,9 @@ class AuthorizeModel {
 
 		//如果是token,先找到token和 appkey的对应
 		if ($_appkey == NULL && $_token != NULL) {
-			$_token_config = get_yaf_config(ADS_APPS_SECRET);
-            var_dump($_token_config);
-			if (!empty($_token_config)) {
-				$_appkey = (isset($_token_config['token'][$_token]) ? $_token_config['token'][$_token] : NULL);
-			}
-		}
-
-
-		//MATCH VOP_DISABLED_APPS
-		if (!empty($_appkey) && !self::check_disabled($_appkey)) {
-			$_config = parse_config(ADS_APPS_CONFIG . DIRECTORY_SEPARATOR .$_appkey.'.ini');
-
-			if (!empty($_config) && !empty($_token)) {//TOKEN IS SET,THEN RETURN RESULT
-
-				$_result = $_config;
-
-			//CHECK IF APPSECERT CORRECT
-			} elseif (!empty($_config) && isset($_config['authorize']['appkey'])
-				&& isset($_config['authorize']['appsecret'])
-				&& $_config['authorize']['appsecret'] == $_appsecret
-				&& $_config['authorize']['appkey'] == $_appkey
-			) {
-				$_result = $_config;
+			$_tmp_token_config = get_yaf_config(ADS_APPS_SECRET);
+			if (!empty($_tmp_token_config) && isset($_tmp_token_config[$_token])) {
+                $_result = $_tmp_token_config[$_token];
 			}
 		}
 		

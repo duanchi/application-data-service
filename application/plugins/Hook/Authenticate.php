@@ -18,7 +18,6 @@ class AuthenticatePlugin extends \Yaf\Plugin_Abstract {
 
             $__REQUEST = \Yaf\Registry::get('__REQUEST');
 
-            
 			//AUTHENTICATE START -->
 			//应用认证,appkey,appsecret,ip,count from authorize_config.ini
 			$__APP = \Process\AuthorizeModel::authenticate($__REQUEST['access-token'], $__REQUEST['client-ip'], $__REQUEST['client-id'], $__REQUEST['client-token']);
@@ -36,4 +35,4 @@ class AuthenticatePlugin extends \Yaf\Plugin_Abstract {
 		}
 
 	}
-} 
+}

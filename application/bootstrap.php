@@ -29,6 +29,7 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
         Yaf\Registry::set('__IS_AUTHORIZED', FALSE);
         Yaf\Registry::set(          '__APP', FALSE);
         Yaf\Registry::set(         '__CONF', FALSE);
+        Yaf\Registry::set(         '__DATA', NULL );
         Yaf\Registry::set(       '__RESULT', NULL );
     }
 
@@ -45,9 +46,9 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
         //注册Hooks
         $dispatcher->registerPlugin(new \Hook\RequestPlugin());
         $dispatcher->registerPlugin(new \Hook\AuthenticatePlugin());
-        /*$dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
+        $dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
         $dispatcher->registerPlugin(new \Hook\FetchDataPlugin());
-        $dispatcher->registerPlugin(new \Hook\ExtraDataPlugin());
+        /*$dispatcher->registerPlugin(new \Hook\ExtraDataPlugin());
         $dispatcher->registerPlugin(new \Hook\ResponsePlugin());
         $dispatcher->registerPlugin(new \Hook\PostEventPlugin());
         */
