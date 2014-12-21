@@ -19,13 +19,13 @@ class FetchDataPlugin extends \Yaf\Plugin_Abstract {
             $__CONF		= \Yaf\Registry::get('__CONF');
 			//FETCH DATA START -->
             //FETCH RAW DATA USE CURL
-			$__RAW_DATA	= \Process\DataModel::fetch_raw($__CONF);
+			$__RAW_DATA	= \Process\DataModel::fetch_raw_data($__CONF);
 
 			$__DATA		= $__RAW_DATA;
             \Yaf\Registry::set('__DATA', $__DATA);
 
 
-			//FETCH CONFIGED DATA
+			//FETCH CONFIG DATA
 			//FETCH DATA END <--
 		}
 

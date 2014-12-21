@@ -18,19 +18,13 @@
 class ErrorController extends Yaf\Controller_Abstract {
 
 	public function errorAction($exception) {
-		$_message = explode('|', $exception->getMessage(), 2);
+		//$_message = explode('|', $exception->getMessage(), 2);
 
 		//$_error = \Api\MessageCode::get($_message[0]);
 
-		if (empty($_error[0]) || $_error == FALSE){
-			$_error = [
-				'S-SF-001',
-				'系统错误',
-				'PARSE'
-			];
-		}
-
-		return_package(package_error($_error, (isset($_message[1]) ? $_message[1] : NULL)));
+        \Core\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
+        \Core\RESPONSE::set($_ECHO, RESPONSE_TYPE_BODY);
+        \Core\RESPONSE::respond();
 
 		//_fastcgi_finish_request();
 		return FALSE;

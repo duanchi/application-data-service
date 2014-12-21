@@ -29,10 +29,11 @@ class AuthorizeModel {
 
 		if ($_result) {
 
+
 			if (API_IP_BIND == TRUE) {
 				if (!self::ip_match($_result->appkey, $_ip)) {
                     $_result = FALSE;
-                    throw new \Exception('INVAILED_REQUEST_IP');
+                    //throw new \Exception('INVAILED_REQUEST_IP');
                 }
 			}
 		}

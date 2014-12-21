@@ -37,6 +37,7 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
         //注册插件
         $dispatcher->registerPlugin(new EnvPlugin());
         $dispatcher->registerPlugin(new ConstPlugin());
+        $dispatcher->registerPlugin(new InitPlugin());
         $dispatcher->registerPlugin(new SecurityPlugin());
 
         $dispatcher->registerPlugin(new DevelPlugin());
