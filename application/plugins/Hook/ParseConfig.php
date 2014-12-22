@@ -23,7 +23,6 @@ class ParseConfigPlugin extends \Yaf\Plugin_Abstract {
 
             \Yaf\Registry::set('__CONF', $__CONF);
 
-            var_dump($__CONF);
 			//PARSE CONFIG END <--
 		}
 

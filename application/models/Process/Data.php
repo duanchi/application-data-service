@@ -16,10 +16,22 @@ namespace Process;
  */
 class DataModel {
 	
-	public static function fetch_raw_data($_conf) {
+	public static function fetch_raw_data($_request, $_conf) {
         $__RESULT       = FALSE;
+        $_tmp_conf      = FALSE;
 
-        var_dump($_conf);
+        var_dump($_request, $_conf);
+        foreach($_conf as $_tmp_value) {
+            if ($_tmp_value->key == NULL && $_tmp_value->uri == $_request['uri']) {
+
+            } else {
+
+            }
+        }
+        //FETCH CONF WITH URI OR KEY
+
+
+        //FETCH URI WITH SCHEME
 
         return $__RESULT;
     }

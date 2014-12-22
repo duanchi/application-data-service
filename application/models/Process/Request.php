@@ -28,6 +28,7 @@ class RequestModel {
         $__RESULT = [
             'method'        => HTTP_GET,
             'uri'           => NULL,
+            'key'           => NULL,
             'uri-scheme'    => URI_SCHEME_HTTP,
             'content-type'  => TYPE_JSON,
             'version'       => REQUEST_VERSION_NULL,
@@ -48,17 +49,17 @@ class RequestModel {
         //MAKE URL PRE-REQUEST
 
         //URI & SCHEME
-        $_tmp_request_uri = explode('|ads?', substr($_request_uri, 1, -1));
+        $_tmp_request_uri   = explode('|ads?', ltrim($_request_uri, '/'));
 
-        $_tmp_uri_scheme = strtoupper(parse_url($_tmp_request_uri[0], PHP_URL_SCHEME));
-        $_tmp_uri_scheme = (defined('URI_SCHEME_' . $_tmp_uri_scheme) ? constant('URI_SCHEME_' . $_tmp_uri_scheme) : NULL);
+        $_tmp_uri_scheme    = strtoupper(parse_url($_tmp_request_uri[0], PHP_URL_SCHEME));
+        $_tmp_uri_scheme    = (defined('URI_SCHEME_' . $_tmp_uri_scheme) ? constant('URI_SCHEME_' . $_tmp_uri_scheme) : NULL);
 
         !empty($_tmp_request_uri[1]) ? parse_str($_tmp_request_uri[1], $_tmp_ads_parameters) : $_tmp_ads_parameters = [];
 
         //CONTENT-TYPE
-        $_tmp_content_type = strtoupper(explode(ADS_DOMAIN, $_SERVER['HTTP_HOST'])[0]);
+        $_tmp_content_type  = strtoupper(explode(ADS_DOMAIN, $_SERVER['HTTP_HOST'])[0]);
         if (!empty($_tmp_host[0])) {
-            $_tmp_content_type = (defined('TYPE_' . $_tmp_host[0]) ? constant('TYPE_' . $_tmp_host[0]) : NULL);
+            $_tmp_content_type  = (defined('TYPE_' . $_tmp_host[0]) ? constant('TYPE_' . $_tmp_host[0]) : NULL);
         }
 
 
