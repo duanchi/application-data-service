@@ -33,10 +33,35 @@ class NETWORK {
             case HTTP_PATCH : $_http_option['method']   = 'PATCH'   ; break;
         }
 
-        $_socket_package = $_http_option['method'] . self::SPACE . $_uri . self::SPACE . $_http_option['version'];
+        //PACKAGE HTTP(S) REQUEST LINE
+        $_socket_package    =   $_http_option['method'].
+                                self::SPACE.
+                                $_uri.
+                                self::SPACE.
+                                $_http_option['version'].
+                                self::BR;
+
+        //PACKAGE HTTP(S) REQUEST HEADER
+
+
+        //PACKAGE HTTP(S) REQUEST BODY
 
 
 
-        echo $_socket_package;
+        return self::process($_socket_package);
+    }
+
+    private static function process($_package) {
+        $_result = NULL;
+        $client = new swoole_client(SWOOLE_TCP | SWOOLE_KEEP);
+        $client->on("connect", function($_cli) use ($_package) {
+            $_cli->send($_package);
+        });
+
+        $client->on("receive", function($_cli, $_data) use ($_result) {
+            $_result = $_data;
+        });
+
+        return $_result;
     }
 }

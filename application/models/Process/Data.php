@@ -15,24 +15,29 @@ namespace Process;
  * @package Process
  */
 class DataModel {
-	
-	public static function fetch_raw_data($_request, $_conf) {
-        $__RESULT       = FALSE;
-        $_tmp_conf      = FALSE;
+
+    public static function parse_parameters($_request, $_conf) {
+        $__RESULT      = FALSE;
 
         //FETCH CONF WITH URI OR KEY
         foreach($_conf->roles as $_tmp_value) {
             if ($_request['key'] == NULL && $_tmp_value->request->uri == $_request['uri']) {
-                $_tmp_conf  = $_tmp_value;
+                $__RESULT  = $_tmp_value;
                 break;
             } elseif ($_request['key'] != NULL && $_tmp_value->key == $_request['key']) {
-                $_tmp_conf  = $_tmp_value;
+                $__RESULT  = $_tmp_value;
                 break;
             }
         }
 
+        return $__RESULT;
+    }
+	
+	public static function fetch_raw_data($_parameters) {
+        $__RESULT       = FALSE;
+
         //FETCH URI WITH SCHEME
-        switch($_tmp_conf->request->scheme) {
+        switch($_parameters->request->scheme) {
             case URI_SCHEME_TCP:
 
                 break;
@@ -42,10 +47,10 @@ class DataModel {
                 //PARSE PARAMETERS
 
                 //SWOOLEING
-                \IO\NETWORK::http(  $_tmp_conf->request->uri,
-                                    [
-                                        'method'    => HTTP_GET,
-                                    ]
+                $__RESULT   = \IO\NETWORK::http(    $_parameters->request->uri,
+                                                    [
+                                                        'method'    => HTTP_GET,
+                                                    ]
                 );
                 break;
         }

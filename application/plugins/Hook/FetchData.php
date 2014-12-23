@@ -16,13 +16,16 @@ class FetchDataPlugin extends \Yaf\Plugin_Abstract {
 
 		if ($request->controller == 'Ads' && \Yaf\Registry::get('__IS_AUTHORIZED') == TRUE) {
 
-            $__CONF		= \Yaf\Registry::get('__CONF');
-			$__REQUEST	= \Yaf\Registry::get('__REQUEST');
+            $__CONF		        = \Yaf\Registry::get('__CONF');
+			$__REQUEST	        = \Yaf\Registry::get('__REQUEST');
 			//FETCH DATA START -->
-            //FETCH RAW DATA USE CURL
-			$__RAW_DATA	= \Process\DataModel::fetch_raw_data($__REQUEST, $__CONF);
 
-			$__DATA		= $__RAW_DATA;
+            //FETCH CONF
+            $_data_parameters   = \Process\DataModel::parse_parameters($__REQUEST, $__CONF);
+            //FETCH RAW DATA
+			$__RAW_DATA         = \Process\DataModel::fetch_raw_data($_data_parameters);
+
+			$__DATA		        = $__RAW_DATA;
             \Yaf\Registry::set('__DATA', $__DATA);
 
 
