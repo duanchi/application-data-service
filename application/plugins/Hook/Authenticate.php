@@ -24,7 +24,7 @@ class AuthenticatePlugin extends \Yaf\Plugin_Abstract {
 
 			if (empty($__APP) || $__APP == FALSE) {
                 //throw new \Exception('AUTHENTICATE_FAILURE');
-                \Core\STATUS::__UNAUTHORIZED__();
+                \CORE\STATUS::__UNAUTHORIZED__();
             }
             else {
                 \Yaf\Registry::set('__IS_AUTHORIZED', TRUE);

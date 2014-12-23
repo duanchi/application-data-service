@@ -20,18 +20,37 @@ class DataModel {
         $__RESULT       = FALSE;
         $_tmp_conf      = FALSE;
 
-        var_dump($_request, $_conf);
-        foreach($_conf as $_tmp_value) {
-            if ($_tmp_value->key == NULL && $_tmp_value->uri == $_request['uri']) {
-
-            } else {
-
+        //FETCH CONF WITH URI OR KEY
+        foreach($_conf->roles as $_tmp_value) {
+            if ($_request['key'] == NULL && $_tmp_value->request->uri == $_request['uri']) {
+                $_tmp_conf  = $_tmp_value;
+                break;
+            } elseif ($_request['key'] != NULL && $_tmp_value->key == $_request['key']) {
+                $_tmp_conf  = $_tmp_value;
+                break;
             }
         }
-        //FETCH CONF WITH URI OR KEY
-
 
         //FETCH URI WITH SCHEME
+        switch($_tmp_conf->request->scheme) {
+            case URI_SCHEME_TCP:
+
+                break;
+
+            case URI_SCHEME_HTTP:
+            default:
+                //PARSE PARAMETERS
+
+                //SWOOLEING
+                \IO\NETWORK::http(  $_tmp_conf->request->uri,
+                                    [
+                                        'method'    => HTTP_GET,
+                                    ]
+                );
+                break;
+        }
+
+
 
         return $__RESULT;
     }

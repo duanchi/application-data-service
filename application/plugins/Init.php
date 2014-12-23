@@ -2,7 +2,7 @@
 class InitPlugin extends Yaf\Plugin_Abstract {
 
 	function __construct() {
-		$this->__init('\Core\STATUS', []);
+		$this->__init('\CORE\STATUS', []);
 	}
 	public function routerStartup(Yaf\Request_Abstract $request, Yaf\Response_Abstract $response) {
 	}

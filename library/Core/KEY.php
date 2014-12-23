@@ -6,7 +6,7 @@
  * Time: 0:17
  */
 
-namespace Core;
+namespace CORE;
 
 define('KEY_REGISTRY', 1);
 define('KEY_STATIC',   2);

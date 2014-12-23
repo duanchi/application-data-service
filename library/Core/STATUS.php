@@ -6,7 +6,7 @@
  * Time: 22:44
  */
 
-namespace Core;
+namespace CORE;
 
 
 class STATUS {

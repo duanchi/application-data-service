@@ -19,11 +19,11 @@ class AdsController extends Yaf\Controller_Abstract {
 	
 	public function indexAction($_URI = NULL) {
 
-        if (\Core\KEY::get('_IS_AUTHORIZED')) {
+        if (\CORE\KEY::get('_IS_AUTHORIZED')) {
 
-            $__REQUEST           = \Core\KEY::get('_REQUEST');
-            $__APP               = \Core\KEY::get('_APP');
-            $__API               = \Core\KEY::get('_API');;
+            $__REQUEST           = \CORE\KEY::get('_REQUEST');
+            $__APP               = \CORE\KEY::get('_APP');
+            $__API               = \CORE\KEY::get('_API');;
             $__RESULT            = FALSE;
             $__RETURN_PACKEGE    = NULL;
 
@@ -34,7 +34,7 @@ class AdsController extends Yaf\Controller_Abstract {
 
             //RESULT PACKAGE START -->
             //接口返回内容封装
-            \Core\KEY::set('_RESPONSE', \Process\ApiModel::package($_RESULT));
+            \CORE\KEY::set('_RESPONSE', \Process\ApiModel::package($_RESULT));
             //RESULT PACKAGE END <--
 
         }

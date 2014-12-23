@@ -9,7 +9,7 @@
  * Time    15:16
  */
 
-namespace Core\DB;
+namespace CORE\DB;
 
 class KV {
 

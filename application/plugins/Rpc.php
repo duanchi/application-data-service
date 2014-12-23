@@ -18,7 +18,7 @@ class RpcPlugin extends Yaf\Plugin_Abstract {
 
 		//RPC INIT START -->
 		if ($request->controller == 'Process' || $request->controller == 'Test') {
-			\Core\Rpc::initialize();
+			\CORE\Rpc::initialize();
 		}
 
 		//RPC INIT END <--

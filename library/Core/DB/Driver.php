@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\DB;
+namespace CORE\DB;
 
 abstract class Driver {
 	

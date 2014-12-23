@@ -6,7 +6,7 @@
  * Time: 22:17
  */
 
-namespace Core;
+namespace CORE;
 
 
 class Rpc {
@@ -30,7 +30,7 @@ class Rpc {
 		$_client_flag = mk_rand_str(8);
 		$_client_engine == NULL ? $_client_engine = self::$_engine_client : FALSE;
 
-		$_class = '\Core\Rpc\\'. $_client_engine . '\Client';
+		$_class = '\CORE\Rpc\\'. $_client_engine . '\Client';
 		self::$__client_instance[$_client_flag] = new $_class($_server_uri, $_options);
 
 		if (is_object(self::$__client_instance[$_client_flag])) $_result = $_client_flag;
@@ -59,7 +59,7 @@ class Rpc {
 		}
 
 		if ($_has_instance == FALSE) {
-			$_class = '\Core\Rpc\\'. $_server_engine . '\Server';
+			$_class = '\CORE\Rpc\\'. $_server_engine . '\Server';
 			self::$__server_instance[$_server_flag] = new $_class($object);
 			$_result = $_server_flag;
 		}

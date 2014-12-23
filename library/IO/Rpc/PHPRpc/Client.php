@@ -52,7 +52,7 @@
  *     echo $result->toString();
  * }
  */
-namespace Core\Rpc\PHPRpc;
+namespace CORE\Rpc\PHPRpc;
 
 $_PHPRPC_COOKIES = array();
 $_PHPRPC_COOKIE = '';

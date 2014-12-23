@@ -15,9 +15,9 @@ class ApiRoutePlugin extends \Yaf\Plugin_Abstract {
 	public function routerShutdown(\Yaf\Request_Abstract $request, \Yaf\Response_Abstract $response) {
 
 		//PRETREATMENT REQUEST START -->
-		if ($request->controller == 'Api' && \Core\KEY::get('_IS_AUTHORIZED')) {
+		if ($request->controller == 'Api' && \CORE\KEY::get('_IS_AUTHORIZED')) {
 
-            $_REQUEST = \Core\KEY::get('_REQUEST');
+            $_REQUEST = \CORE\KEY::get('_REQUEST');
 
             //API ROUTER START -->
             //路由到对应api from api_config_devel.ini
@@ -27,7 +27,7 @@ class ApiRoutePlugin extends \Yaf\Plugin_Abstract {
             if ($_API == FALSE || empty($_API)) throw new \Exception('API_ROUTE_ERROR');
             //API ROUTER END <--
 
-            \Core\KEY::set('_API', $_API);
+            \CORE\KEY::set('_API', $_API);
 
         }
 		//PRETREATMENT REQUEST END <--

@@ -6,7 +6,7 @@
  * Time: 15:08
  */
 
-namespace Core;
+namespace CORE;
 
 
 class RESPONSE {

@@ -6,7 +6,7 @@
  * Time: 12:57
  */
 
-namespace Core;
+namespace CORE;
 
 
 class CONF {

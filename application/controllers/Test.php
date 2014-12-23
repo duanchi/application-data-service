@@ -39,9 +39,9 @@ class TestController extends Yaf\Controller_Abstract {
 	}
 
 	public function rpcAction() {
-		\Core\Rpc::add_server(new TestServer(), NULL, 'Yar');
-		\Core\Rpc::handle();
-		/*$server = new \Core\Rpc\PHPRpc\Server();
+		\CORE\Rpc::add_server(new TestServer(), NULL, 'Yar');
+		\CORE\Rpc::handle();
+		/*$server = new \CORE\Rpc\PHPRpc\Server();
 		$server->add(new TestServer());
 		$server->setCharset('UTF-8');
 		$server->setDebugMode(FALSE);
@@ -63,10 +63,10 @@ class TestController extends Yaf\Controller_Abstract {
 		];
 		//{{{"V0001"},{"order1"},{"","",""}},{{"V0016"},{"order2"},{"order3","targetnum","18618610010"}}}
 		//var_dump($service);
-		\Core\Rpc::add_client(RPC_TEST_PHPRPC_URI, NULL, 'PHPRpc');
-		//$_result = \Core\Rpc::call()->RegisterAccount('17090440005','FFFFFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFFFFFF', 'postpaid', $service, '史景烨', '北京', '010', '130xxxxxxxxxx');
+		\CORE\Rpc::add_client(RPC_TEST_PHPRPC_URI, NULL, 'PHPRpc');
+		//$_result = \CORE\Rpc::call()->RegisterAccount('17090440005','FFFFFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFFFFFF', 'postpaid', $service, '史景烨', '北京', '010', '130xxxxxxxxxx');
 
-		$_result = \Core\Rpc::call()->getServiceByUser('5');
+		$_result = \CORE\Rpc::call()->getServiceByUser('5');
 		var_dump($_result);
 		return FALSE;
 	}
@@ -77,7 +77,7 @@ class TestController extends Yaf\Controller_Abstract {
 	}
 
     public function constant() {
-        \Core\STATUS::APP_NOT_DEFINED('700.1.1');
+        \CORE\STATUS::APP_NOT_DEFINED('700.1.1');
         return FALSE;
     }
 
@@ -85,8 +85,8 @@ class TestController extends Yaf\Controller_Abstract {
         $a =  null;
         $start = $this->get_microtime();
         for ($i = 0; $i<1000; $i++) {
-            \Core\KEY::set('test', $i, KEY_STATIC);
-            $a = \Core\KEY::get('test', KEY_STATIC);
+            \CORE\KEY::set('test', $i, KEY_STATIC);
+            $a = \CORE\KEY::get('test', KEY_STATIC);
         }
         $end = $this->get_microtime();
 

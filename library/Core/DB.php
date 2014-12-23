@@ -1,5 +1,5 @@
 <?php
-namespace Core;
+namespace CORE;
 
 class DB {
 	
@@ -21,7 +21,7 @@ class DB {
 			self::$_driver = $_config['_config']->driver;
 			
 			//connect to database
-			$_class = '\Core\DB\Driver\\'.ucfirst(self::$_driver);
+			$_class = '\CORE\DB\Driver\\'.ucfirst(self::$_driver);
 			$_options = [
 				'_config'		=>	$_config['_config'],
 				'_connect'		=>	$_config['_connect'],

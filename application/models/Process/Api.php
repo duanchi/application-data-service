@@ -32,7 +32,7 @@ class ApiModel {
 	 * @return bool
 	 */
 	public static function process($_api, $_parameters = []) {
-		return \Core\Rpc::call()->$_api['proc_method']($_parameters, $_api);
+		return \CORE\Rpc::call()->$_api['proc_method']($_parameters, $_api);
 	}
 
 	/**

@@ -17,8 +17,8 @@ class ResponsePlugin extends \Yaf\Plugin_Abstract {
 
         if ($request->controller == 'Api') {
 
-            $_REQUEST = \Core\KEY::get('_REQUEST');
-            $_RESPONSE = \Core\KEY::get('_RESPONSE');
+            $_REQUEST = \CORE\KEY::get('_REQUEST');
+            $_RESPONSE = \CORE\KEY::get('_RESPONSE');
             $_ECHO = '';
 
             switch ($_REQUEST['content-type']) {
@@ -39,9 +39,9 @@ class ResponsePlugin extends \Yaf\Plugin_Abstract {
                     break;
             }
 
-            \Core\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
-            \Core\RESPONSE::set($_ECHO, RESPONSE_TYPE_BODY);
-            \Core\RESPONSE::respond();
+            \CORE\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
+            \CORE\RESPONSE::set($_ECHO, RESPONSE_TYPE_BODY);
+            \CORE\RESPONSE::respond();
         }
 
     }
