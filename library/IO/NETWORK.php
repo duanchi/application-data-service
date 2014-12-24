@@ -13,6 +13,8 @@ class NETWORK {
 
     CONST SPACE     = ' ';
     CONST BR        = "\r\n";
+    private static $i      = 0;
+    private static $___result  = '';
 
     public static function http($_uri, $_option = NULL) {
         $_http_option = [
@@ -69,17 +71,26 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
 ';
 
 
-        $client = new \swoole_client(SWOOLE_TCP, SWOOLE_SOCK_ASYNC);
+        $client = new \swoole_client(SWOOLE_TCP/*, SWOOLE_SOCK_ASYNC*/);
 
-        $client->on("connect", function($_cli) use ($_package) {
+        /*$client->on("connect", function($_cli) use ($_package) {
             $_cli->send($_package);
             echo '1';
         });
 
-        $client->on("receive", function($_cli, $_data) use ($_result) {
-            /*$_result = $_data;
+        $_result = '';
+
+        $i = 0;
+
+        $client->on("send", function($_cli) {
+            $_cli->recv();
+            echo '3';
+            $_cli->recv();
+            echo '4';
             $_cli->close();
-            var_dump($_result);*/
+        });
+        $client->on("receive", function($_cli, $_data) use ($_result) {
+            self::$___result .= $_data;
             echo '2';
         });
 
@@ -88,6 +99,7 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
         });
 
         $client->on("close", function($cli) {
+            for ($i=0; $i < 3; $i++) $cli->recv();
             echo 'close';
         });
 
@@ -95,13 +107,15 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
         $client->connect('127.0.0.1', 80, 0.5);
         //$_result = $client->recv();
 
-        $client->close();
+        //$client->close();
+
+        var_dump(self::$___result);*/
 
         $status = 0;
-/*
 
 
-        if ($client->connect('127.0.0.1', 80, 10)) {
+
+        if ($client->connect('127.0.0.1', 80, 0.5)) {
             $status = $client->send($_package);
             var_dump($_package);
         } else {
@@ -110,21 +124,33 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
 
         $_result = '';
 
-        $_result = $client->recv();
-        /*for ($i = 0; $i < 10; $i++) {
+        //$_result = $client->recv();
+        /*for ($i = 0; $i < 4; $i++) {
             try {
-                $tmp_stream = $client->recv(20 * 1024 * 1024);
+                $tmp_stream = $client->recv();
             } catch (\Exception $e) {
 
             }
 
             var_dump(strlen($tmp_stream));
             $_result .= $tmp_stream;
-        } */
-        //$client->close();
-        //var_dump($client->errCode);
+        }*/
+
+        $_tmp_stream    = $client->recv();
+
+        $_response                      = [];
+
+        list(   $_tmp_response_header,
+                $_response['body']
+            )                           = explode("\r\n\r\n", $_tmp_stream);
+
+        $_tmp_response_header           = explode("\r\n", $_tmp_response_header);
+        $_response['line']     = array_shift($_tmp_response_header);
+        $_response['header']   = $_tmp_response_header;
+
+        $client->close();
 
         file_put_contents(APPLICATION_PATH . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'cache.log', $_result, FILE_APPEND);
-        return $_result;
+        return $_response;
     }
 }

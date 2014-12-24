@@ -47,15 +47,15 @@ class DataModel {
                 //PARSE PARAMETERS
 
                 //SWOOLEING
-                /*$__RESULT   = \IO\NETWORK::http(    $_parameters->request->uri,
+                $__RESULT   = \IO\NETWORK::http(    $_parameters->request->uri,
                                                     [
                                                         'method'    => HTTP_GET,
                                                     ]
-                );*/
+                );
 
-                $_handle    = new \IO\HTTP($_parameters->request->uri);
+                /*$_handle    = new \IO\HTTP($_parameters->request->uri);
                 $_handle->onReady(function(){return;});
-                $__RESULT   = $_handle->execute();
+                $__RESULT   = $_handle->execute(); */
                 break;
         }
 
