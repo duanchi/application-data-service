@@ -22,9 +22,10 @@ class ErrorController extends Yaf\Controller_Abstract {
 
 		//$_error = \Api\MessageCode::get($_message[0]);
 
-        \CORE\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
-        \CORE\RESPONSE::set($_ECHO, RESPONSE_TYPE_BODY);
-        \CORE\RESPONSE::respond();
+		var_dump($exception);
+        //\CORE\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
+        //\CORE\RESPONSE::set($_ECHO, RESPONSE_TYPE_BODY);
+        //\CORE\RESPONSE::respond();
 
 		//_fastcgi_finish_request();
 		return FALSE;
