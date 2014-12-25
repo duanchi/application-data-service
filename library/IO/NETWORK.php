@@ -117,7 +117,7 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
 
         if ($client->connect('127.0.0.1', 80, 0.5)) {
             $status = $client->send($_package);
-            var_dump($_package);
+            //var_dump($_package);
         } else {
             echo "connect failed.";
         }
@@ -141,16 +141,56 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
         $_response                      = [];
 
         list(   $_tmp_response_header,
-                $_response['body']
+                $_tmp_response_body,
             )                           = explode("\r\n\r\n", $_tmp_stream);
 
         $_tmp_response_header           = explode("\r\n", $_tmp_response_header);
-        $_response['line']     = array_shift($_tmp_response_header);
-        $_response['header']   = $_tmp_response_header;
+
+        //$_response['raw']               = $_tmp_stream;
+        $_response['line']              = array_shift($_tmp_response_header);
+
+        $_tmp_response_line             = explode(' ', $_response['line'], 2);
+
+        if (count($_tmp_response_line) == 2) {
+            $_response['version']           = $_tmp_response_line[0];
+            $_response['status']            = $_tmp_response_line[1];
+        } else {
+            \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
+        }
+
+
+
+
+        $_response['header']            = [];
+        foreach ($_tmp_response_header as $_value) {
+            $_tmp_header                = explode(': ', $_value, 2);
+
+            count($_tmp_header) == 2 ?
+                $_response['header'][strtolower($_tmp_header[0])]   = $_tmp_header[1]
+                :
+                $_response['header'][$_tmp_header[0]]               = $_tmp_header[0];
+        }
+
+        $_tmp_response_body             = explode("\r\n", $_tmp_response_body, 2);
+        $_response['body']              = rtrim($_tmp_response_body[1], "\r\n");
+
+        if ($_response['version'] > HTTP_VERSION_10 && $_response['header']['transfer-encoding'] == 'chunked') {
+            loop_recv:
+
+            $_tmp_stream                = $client->recv();
+            $_tmp_stream                = explode("\r\n", $_tmp_stream, 2);
+            if ($_tmp_stream[0] == '0') ;
+            else {
+                $_response['body']     .= rtrim($_tmp_stream[1], "\r\n");
+                goto loop_recv;
+            }
+        }
+
+        $_response['body-length']       = strlen($_response['body']);
 
         $client->close();
 
-        file_put_contents(APPLICATION_PATH . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'cache.log', $_result, FILE_APPEND);
+        file_put_contents(APPLICATION_PATH . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'cache.log', $_tmp_stream, FILE_APPEND);
         return $_response;
     }
 }
