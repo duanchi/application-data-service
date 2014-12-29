@@ -9,24 +9,24 @@ namespace IO;
 
 class HTTP
 {
-    private static $_instances      = [];
-    private static $_requests       = [];
+    private static $_instances      =   [];
+    private static $_requests       =   [];
 
-    CONST SEPARATOR                 = ' ';
-    CONST CR                        = "\r";
-    CONST LF                        = "\n";
-    CONST CRLF                      = CR . LF;
-    CONST CONNECT_TIMEOUT           = 0.5;
+    CONST SEPARATOR                 =   ' ';
+    CONST CR                        =   "\r";
+    CONST LF                        =   "\n";
+    CONST CRLF                      =   CR . LF;
+    CONST CONNECT_TIMEOUT           =   0.5;
 
     public  static function add_request($_uri, $_options = []) {
 
-        $__RESULT               = TRUE;
         $_http_option           =   [
                                         'method'    => HTTP_GET,
                                         'version'   => 'HTTP/1.1',
                                         'timeout'   => 10,
                                         'request'   => NULL,
                                     ];
+        $__RESULT               =   make_uuid($_http_option['method']);
 
         foreach ($_http_option as $_key => $_value) isset($_options[$_key]) ? $_http_option[$_key] = $_options[$_key] : FALSE;
 
@@ -68,7 +68,7 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
 ';
 
 
-        self::$_requests[]      =   [
+        self::$_requests[$__RESULT] =   [
                                         'host'      => '127.0.0.1',
                                         'port'      => '80',
                                         'timeout'   => '10',
@@ -85,17 +85,17 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
 
         if (empty(self::$_requests)) ;
         else {
-            foreach (self::$_requests as $_request) {
+            foreach (self::$_requests as $_key => $_request) {
                 $_socket_handle = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
-                $ret = $_socket_handle->connect('127.0.0.1', 9501, 0.5, 0);
-                if(!$ret)
+                $_connect_status = $_socket_handle->connect('127.0.0.1', 9501, 0.5, 0);
+                if(!$_connect_status)
                 {
                     echo "Connect Server fail.errCode=".$_socket_handle->errCode;
                 }
                 else
                 {
                     $_socket_handle->send("HELLO WORLD\n");
-                    $_socket_instances[$_socket_handle->sock] = $_socket_handle;
+                    $_socket_instances[$_key] = $_socket_handle;
                 }
             }
 
@@ -109,7 +109,7 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
                     foreach($read as $index=>$c)
                     {
                         echo "Recv #{$c->sock}: ".$c->recv()."\n";
-                        unset($_socket_instances[$c->sock]);
+                        unset($_socket_instances[$index]);
                     }
                 }
             }
