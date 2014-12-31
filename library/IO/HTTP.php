@@ -94,8 +94,8 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
         if (empty(self::$_requests)) ;
         else {
             foreach (self::$_requests as $_key => $_request) {
-                $_socket_handle = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
-                $_connect_status = $_socket_handle->connect($_request['host'], $_request['port'], $_connect_timeout, 0);
+                $_socket_handle     = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
+                $_connect_status    = $_socket_handle->connect($_request['host'], $_request['port'], $_connect_timeout, 0);
                 if(!$_connect_status)
                 {
                     echo "Connect Server fail.errCode=".$_socket_handle->errCode;
@@ -111,14 +111,69 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
             {
                 $_write             =   [];
                 $_error             =   [];
-                $_read              =   $_socket_instances;
-                $_client_left       =   swoole_client_select($read, $write, $error, $_read_timeout);
+                $_client_left       =   swoole_client_select($_socket_instances, $_write, $_error, $_read_timeout);
 
                 if($_client_left > 0)
                 {
-                    foreach($_read as $_key => $_client)
+                    foreach($_socket_instances as $_key => $_client)
                     {
-                        echo "Recv #{$_client->sock}: ".$_client->recv()."\n";
+                        $_response                      =   [];
+                        $_last_body_length              =   -1;
+                        $_tmp_stream                    =   explode("\r\n\r\n", $_client->recv(), 2);
+
+                        //var_dump(count($_tmp_stream));
+
+                        if (count($_tmp_stream) == 2) {
+                            $_tmp_response_header       =   $_tmp_stream[0];
+                            $_tmp_response_body         =   $_tmp_stream[1];
+                        } else {
+                            \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
+                        }
+
+                        $_tmp_response_header           =   explode("\r\n", $_tmp_response_header);
+
+                        $_response['line']              =   array_shift($_tmp_response_header);
+
+                        $_tmp_response_line             =   explode(' ', $_response['line'], 2);
+
+                        if (count($_tmp_response_line) == 2) {
+                            $_response['version']       =   $_tmp_response_line[0];
+                            $_response['status']        =   $_tmp_response_line[1];
+                        } else {
+                            \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
+                        }
+
+                        $_response['header']            =   [];
+                        foreach ($_tmp_response_header as $_value) {
+                            $_tmp_header                =   explode(': ', $_value, 2);
+
+                            count($_tmp_header) == 2 ?
+                                $_response['header'][strtolower($_tmp_header[0])]   =   $_tmp_header[1]
+                                :
+                                $_response['header'][$_tmp_header[0]]               =   $_tmp_header[0];
+                        }
+
+                        $_tmp_response_body             =   explode("\r\n", $_tmp_response_body, 2);
+                        $_response['body']              =   rtrim($_tmp_response_body[1], "\r\n");
+
+
+                        if ($_response['version'] > HTTP_VERSION_10 && $_response['header']['transfer-encoding'] == 'chunked') {
+                            //while ($_last_body_length != 0) {
+                                echo '1';
+                                $_tmp_stream                = $_client->recv();
+                                $_tmp_stream                = explode("\r\n", $_tmp_stream, 2);
+                                $_tmp_stream_1 = substr($_tmp_stream[1], hexdec($_tmp_stream[0]));
+                            var_dump($_tmp_stream_1);
+                                var_dump($_tmp_stream);
+                                if ($_tmp_stream[0] == '0') ;
+                                else {
+                                    $_response['body']     .= rtrim($_tmp_stream[1], "\r\n");
+                                }
+                                $_last_body_length    = $_tmp_stream[0];
+                            //}
+
+                        }
+                        //var_dump($_response);
                         unset($_socket_instances[$_key]);
                     }
                 }
