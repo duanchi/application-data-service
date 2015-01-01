@@ -156,20 +156,31 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
                         $_tmp_response_body             =   explode("\r\n", $_tmp_response_body, 2);
                         $_response['body']              =   rtrim($_tmp_response_body[1], "\r\n");
 
+                        //var_dump($_response);
 
                         if ($_response['version'] > HTTP_VERSION_10 && $_response['header']['transfer-encoding'] == 'chunked') {
                             //while ($_last_body_length != 0) {
+                            $_tmp_stream                = $_client->recv();
+                            $_tmp_stream_1 = [];
+                            for ($i = 0;$i<2;$i++) {
                                 echo '1';
-                                $_tmp_stream                = $_client->recv();
-                                $_tmp_stream                = explode("\r\n", $_tmp_stream, 2);
-                                $_tmp_stream_1 = substr($_tmp_stream[1], hexdec($_tmp_stream[0]));
-                            var_dump($_tmp_stream_1);
-                                var_dump($_tmp_stream);
-                                if ($_tmp_stream[0] == '0') ;
+                                $_tmp_current_stream                = explode("\r\n", $_tmp_stream, 2);
+                                $_tmp_stream = substr($_tmp_current_stream[1], hexdec($_tmp_current_stream[0]) + 2);
+                                $_tmp_current_stream = substr($_tmp_current_stream[1], 0, hexdec($_tmp_current_stream[0]));
+
+
+                                //    $_tmp_stream_1 = str_replace("\r\n2000\r\n", '', $_tmp_stream[1]);
+                                $_tmp_stream_1[$i] = $_tmp_current_stream;
+
+                                /*if ($_tmp_stream[0] == '0') ;
                                 else {
                                     $_response['body']     .= rtrim($_tmp_stream[1], "\r\n");
                                 }
-                                $_last_body_length    = $_tmp_stream[0];
+                                $_last_body_length    = $_tmp_stream[0];*/
+                            }
+
+                            //var_dump($_tmp_stream_1);
+
                             //}
 
                         }
