@@ -94,102 +94,144 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
         if (empty(self::$_requests)) ;
         else {
             foreach (self::$_requests as $_key => $_request) {
+
                 $_socket_handle     = new \swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
                 $_connect_status    = $_socket_handle->connect($_request['host'], $_request['port'], $_connect_timeout, 0);
-                if(!$_connect_status)
-                {
+
+                if(!$_connect_status) {
                     echo "Connect Server fail.errCode=".$_socket_handle->errCode;
-                }
-                else
-                {
+                } else {
                     $_socket_handle->send($_request['package']);
                     $_socket_instances[$_key] = $_socket_handle;
                 }
             }
 
-            while(!empty($_socket_instances))
-            {
+            while(!empty($_socket_instances)) {
+
                 $_write             =   [];
                 $_error             =   [];
                 $_client_left       =   swoole_client_select($_socket_instances, $_write, $_error, $_read_timeout);
 
-                if($_client_left > 0)
-                {
-                    foreach($_socket_instances as $_key => $_client)
-                    {
-                        $_response                      =   [];
-                        $_last_body_length              =   -1;
-                        $_tmp_stream                    =   explode("\r\n\r\n", $_client->recv(), 2);
+                if($_client_left > 0) {
 
-                        //var_dump(count($_tmp_stream));
-
-                        if (count($_tmp_stream) == 2) {
-                            $_tmp_response_header       =   $_tmp_stream[0];
-                            $_tmp_response_body         =   $_tmp_stream[1];
-                        } else {
-                            \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
-                        }
-
-                        $_tmp_response_header           =   explode("\r\n", $_tmp_response_header);
-
-                        $_response['line']              =   array_shift($_tmp_response_header);
-
-                        $_tmp_response_line             =   explode(' ', $_response['line'], 2);
-
-                        if (count($_tmp_response_line) == 2) {
-                            $_response['version']       =   $_tmp_response_line[0];
-                            $_response['status']        =   $_tmp_response_line[1];
-                        } else {
-                            \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
-                        }
-
-                        $_response['header']            =   [];
-                        foreach ($_tmp_response_header as $_value) {
-                            $_tmp_header                =   explode(': ', $_value, 2);
-
-                            count($_tmp_header) == 2 ?
-                                $_response['header'][strtolower($_tmp_header[0])]   =   $_tmp_header[1]
-                                :
-                                $_response['header'][$_tmp_header[0]]               =   $_tmp_header[0];
-                        }
-
-                        $_tmp_response_body             =   explode("\r\n", $_tmp_response_body, 2);
-                        $_response['body']              =   rtrim($_tmp_response_body[1], "\r\n");
-
-                        //var_dump($_response);
-
-                        if ($_response['version'] > HTTP_VERSION_10 && $_response['header']['transfer-encoding'] == 'chunked') {
-                            //while ($_last_body_length != 0) {
-                            $_tmp_stream                = $_client->recv();
-                            $_tmp_stream_1 = [];
-                            for ($i = 0;$i<2;$i++) {
-                                echo '1';
-                                $_tmp_current_stream                = explode("\r\n", $_tmp_stream, 2);
-                                $_tmp_stream = substr($_tmp_current_stream[1], hexdec($_tmp_current_stream[0]) + 2);
-                                $_tmp_current_stream = substr($_tmp_current_stream[1], 0, hexdec($_tmp_current_stream[0]));
-
-
-                                //    $_tmp_stream_1 = str_replace("\r\n2000\r\n", '', $_tmp_stream[1]);
-                                $_tmp_stream_1[$i] = $_tmp_current_stream;
-
-                                /*if ($_tmp_stream[0] == '0') ;
-                                else {
-                                    $_response['body']     .= rtrim($_tmp_stream[1], "\r\n");
-                                }
-                                $_last_body_length    = $_tmp_stream[0];*/
-                            }
-
-                            //var_dump($_tmp_stream_1);
-
-                            //}
-
-                        }
-                        //var_dump($_response);
+                    foreach($_socket_instances as $_key => $_instance) {
+                        $__RESULT[$_key]                = self::execute_receive($_instance);
                         unset($_socket_instances[$_key]);
                     }
                 }
             }
         }
+
+        return $__RESULT;
+    }
+
+    private static function execute_receive($_instance) {
+        $__RESULT                      =   [
+                                                'line'      => '',
+                                                'header'    => [],
+                                                'version'   => '',
+                                                'status'    => '',
+                                                'body'      => '',
+        ];
+        //EXPLODE STREAM HEADER AND BODY
+        $_tmp_stream                    =   explode(self::CRLF.self::CRLF, $_instance->recv(), 2);
+
+        if (count($_tmp_stream) == 2) {
+
+            $_tmp_response_header       =   $_tmp_stream[0];
+            $_tmp_response_body         =   $_tmp_stream[1];
+
+        } else \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
+
+        $__RESULT                       =   array_merge(
+                                                            $__RESULT,
+                                                            self::execute_header($_tmp_response_header)
+                                                        );
+
+        if (
+            $__RESULT['version'] > HTTP_VERSION_10
+            and
+            $__RESULT['header']['transfer-encoding'] == 'chunked'
+        ) {
+            $__RESULT                   =   array_merge(
+                                                            $__RESULT,
+                                                            self::execute_body_type_chunked($_tmp_response_body, $_instance)
+                                                        );
+        }
+
+        return $__RESULT;
+    }
+
+    private static function execute_header($_stream) {
+
+        $__RESULT                       =   [
+                                                'line'      => '',
+                                                'header'    => [],
+                                                'version'   => '',
+                                                'status'    => '',
+        ];
+        $_tmp_header                    =   explode(self::CRLF, $_stream);
+        $__RESULT['line']               =   array_shift($_tmp_header);
+        $_tmp_line                      =   explode(' ', $__RESULT['line'], 2);
+
+        if (count($_tmp_line) == 2) {
+
+            $__RESULT['version']        =   $_tmp_line[0];
+            $__RESULT['status']         =   $_tmp_line[1];
+
+        } else \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
+
+        foreach ($_tmp_header as $_value) {
+
+            $_tmp_header                =   explode(': ', $_value, 2);
+
+            count($_tmp_header) == 2 ?
+                $__RESULT['header'][strtolower($_tmp_header[0])]   =   $_tmp_header[1]
+                :
+                $__RESULT['header'][$_tmp_header[0]]               =   $_tmp_header[0];
+        }
+
+        return $__RESULT;
+    }
+
+    private static function execute_body_type_chunked($_stream, $_sock_instance = FALSE) {
+
+        $__RESULT                       =   [
+                                                'body'          => '',
+                                                'body_length'   => 0
+        ];
+        //$_response_eof                  =   ($_sock_instance!= FALSE) ? FALSE : TRUE;
+        $_response_eof                  =   FALSE;
+        $_tmp_stream                    =   $_stream;
+
+        do {
+            parse_stream:
+
+            $_tmp_current_stream        =   explode(self::CRLF, $_tmp_stream, 2);
+            $_tmp_current_stream_len    =   hexdec($_tmp_current_stream[0]);
+
+            if ($_tmp_current_stream_len != 0) {
+
+                $_tmp_stream            =   substr($_tmp_current_stream[1], $_tmp_current_stream_len + 2);
+                $_tmp_current_stream= substr($_tmp_current_stream[1], 0, $_tmp_current_stream_len);
+                $__RESULT['body']      .=   $_tmp_current_stream;
+                $__RESULT['body_length']   +=   $_tmp_current_stream_len;
+
+                if (!empty($_tmp_stream))   goto parse_stream;
+
+                $_tmp_stream            =   ($_sock_instance != FALSE) ? $_sock_instance->recv() : FALSE;
+            } else {
+                $_response_eof          =   TRUE;
+                $_tmp_stream            =   FALSE;
+            }
+
+        } while (
+                    !(
+                        $_response_eof
+                        or
+                        ($_tmp_stream == FALSE)
+                    )
+                );
 
         return $__RESULT;
     }
