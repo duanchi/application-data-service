@@ -7,6 +7,13 @@
  */
 namespace IO;
 
+/**
+ * Class HTTP
+ * @package IO
+ *
+ * @todo change throw exception to class level error code.
+ */
+
 class HTTP
 {
     private static $_instances      =   [];
@@ -75,11 +82,11 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
 ';
 
         self::$_requests[$__RESULT] =   [
-                                        'host'      => $_http_option['host'],
-                                        'port'      => '80',
-                                        'timeout'   => '10',
-                                        'package'   => $_socket_package
-                                    ];
+                                            'host'      => $_http_option['host'],
+                                            'port'      => '80',
+                                            'timeout'   => '10',
+                                            'package'   => $_socket_package
+                                        ];
 
         return $__RESULT;
     }
@@ -126,103 +133,146 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
     }
 
     private static function execute_receive($_instance) {
-        $__RESULT                      =   [
-                                                'line'      => '',
-                                                'header'    => [],
-                                                'version'   => '',
-                                                'status'    => '',
-                                                'body'      => '',
-        ];
+        $__RESULT                   =   [
+                                            'line'      => '',
+                                            'header'    => [],
+                                            'version'   => '',
+                                            'status'    => '',
+                                            'body'      => '',
+                                            'body-length'   => 0
+                                        ];
         //EXPLODE STREAM HEADER AND BODY
-        $_tmp_stream                    =   explode(self::CRLF.self::CRLF, $_instance->recv(), 2);
+        $_tmp_stream                =   explode(self::CRLF.self::CRLF, $_instance->recv(), 2);
 
         if (count($_tmp_stream) == 2) {
 
-            $_tmp_response_header       =   $_tmp_stream[0];
-            $_tmp_response_body         =   $_tmp_stream[1];
+            $_tmp_response_header   =   $_tmp_stream[0];
+            $_tmp_response_body     =   $_tmp_stream[1];
 
         } else \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
 
-        $__RESULT                       =   array_merge(
-                                                            $__RESULT,
-                                                            self::execute_header($_tmp_response_header)
-                                                        );
+        $__RESULT                   =   array_merge(
+                                            $__RESULT,
+                                            self::execute_header($_tmp_response_header)
+                                        );
 
-        if (
-            $__RESULT['version'] > HTTP_VERSION_10
-            and
-            $__RESULT['header']['transfer-encoding'] == 'chunked'
-        ) {
-            $__RESULT                   =   array_merge(
-                                                            $__RESULT,
-                                                            self::execute_body_type_chunked($_tmp_response_body, $_instance)
-                                                        );
-        }
+        do {
+
+            $_gzipped               =   (
+                                            isset($__RESULT['header']['content-encoding'])
+                                            and
+                                            $__RESULT['header']['content-encoding'] == 'gzip'
+                                        ) ?
+                                            TRUE : FALSE;
+
+            //HTTP 1.1 WITH TYPE CHUNKED
+            if (
+                $__RESULT['version'] == HTTP_VERSION_11
+                and
+                $__RESULT['header']['transfer-encoding'] == 'chunked'
+            ) {
+                $__RESULT           =   array_merge(
+                                            $__RESULT,
+                                            self::execute_body_type_chunked($_tmp_response_body, $_instance, $_gzipped)
+                                        );
+                break;
+            }
+
+            //HTTP 1.1 NORMAL WITH CONTENT-LENGTH
+            if (
+                $__RESULT['version'] == HTTP_VERSION_11
+                and
+                isset($__RESULT['header']['content-length'])
+            ) {
+
+                $__RESULT           =   array_merge(
+                                            $__RESULT,
+                                            self::execute_body_with_content_length($_instance->recv(), $__RESULT['header']['content-length'], $_instance, $_gzipped)
+                                        );
+                break;
+            }
+            //HTTP 1.1 NORMAL
+
+        } while (FALSE);
+
 
         return $__RESULT;
     }
 
     private static function execute_header($_stream) {
 
-        $__RESULT                       =   [
-                                                'line'      => '',
-                                                'header'    => [],
-                                                'version'   => '',
-                                                'status'    => '',
-        ];
-        $_tmp_header                    =   explode(self::CRLF, $_stream);
-        $__RESULT['line']               =   array_shift($_tmp_header);
-        $_tmp_line                      =   explode(' ', $__RESULT['line'], 2);
+        $__RESULT                   =   [
+                                            'line'      => '',
+                                            'header'    => [],
+                                            'version'   => '',
+                                            'status'    => '',
+                                        ];
+        $_tmp_header                =   explode(self::CRLF, $_stream);
+        $__RESULT['line']           =   array_shift($_tmp_header);
+        $_tmp_line                  =   explode(' ', $__RESULT['line'], 2);
 
         if (count($_tmp_line) == 2) {
 
-            $__RESULT['version']        =   $_tmp_line[0];
-            $__RESULT['status']         =   $_tmp_line[1];
+            $__RESULT['version']    =   $_tmp_line[0];
+            $__RESULT['status']     =   $_tmp_line[1];
 
         } else \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
 
         foreach ($_tmp_header as $_value) {
 
-            $_tmp_header                =   explode(': ', $_value, 2);
+            $_tmp_header            =   explode(': ', $_value, 2);
 
             count($_tmp_header) == 2 ?
-                $__RESULT['header'][strtolower($_tmp_header[0])]   =   $_tmp_header[1]
+                $__RESULT['header'][strtolower($_tmp_header[0])]   =   strtolower($_tmp_header[1])
                 :
-                $__RESULT['header'][$_tmp_header[0]]               =   $_tmp_header[0];
+                $__RESULT['header'][strtolower($_tmp_header[0])]   =   strtolower($_tmp_header[0]);
         }
 
         return $__RESULT;
     }
 
-    private static function execute_body_type_chunked($_stream, $_sock_instance = FALSE) {
+    private static function execute_body_with_content_length($_stream, $_content_length, $_sock_instance = FALSE, $_gzipped = FALSE) {
+        $__RESULT                   =   [
+                                            'body'          => '',
+                                            'body_length'   => 0
+                                        ];
+        $__RESULT['body']           =   $_stream;
+        $_stream_length             =   strlen($_stream);
+        $__RESULT['body-length']    =   ($_stream_length == $_content_length) ?
+                                            $_content_length
+                                            :
+                                            strlen($_stream);
 
-        $__RESULT                       =   [
-                                                'body'          => '',
-                                                'body_length'   => 0
-        ];
-        //$_response_eof                  =   ($_sock_instance!= FALSE) ? FALSE : TRUE;
-        $_response_eof                  =   FALSE;
-        $_tmp_stream                    =   $_stream;
+    }
+
+    private static function execute_body_type_chunked($_stream, $_sock_instance = FALSE, $_gzipped = FALSE) {
+
+        $__RESULT                   =   [
+                                            'body'          => '',
+                                            'body-length'   => 0
+                                        ];
+        $_response_eof              =   FALSE;
+        $_tmp_stream                =   $_stream;
 
         do {
             parse_stream:
 
-            $_tmp_current_stream        =   explode(self::CRLF, $_tmp_stream, 2);
-            $_tmp_current_stream_len    =   hexdec($_tmp_current_stream[0]);
+            $_tmp_current_stream    =   explode(self::CRLF, $_tmp_stream, 2);
+            $_tmp_current_stream_len=   hexdec($_tmp_current_stream[0]);
 
             if ($_tmp_current_stream_len != 0) {
 
-                $_tmp_stream            =   substr($_tmp_current_stream[1], $_tmp_current_stream_len + 2);
-                $_tmp_current_stream= substr($_tmp_current_stream[1], 0, $_tmp_current_stream_len);
-                $__RESULT['body']      .=   $_tmp_current_stream;
-                $__RESULT['body_length']   +=   $_tmp_current_stream_len;
+                $_tmp_stream        =   substr($_tmp_current_stream[1], $_tmp_current_stream_len + 2);
+                $_tmp_current_stream=   substr($_tmp_current_stream[1], 0, $_tmp_current_stream_len);
+                $__RESULT['body']  .=   $_tmp_current_stream;
+                $__RESULT['body-length']   +=   $_tmp_current_stream_len;
 
                 if (!empty($_tmp_stream))   goto parse_stream;
 
-                $_tmp_stream            =   ($_sock_instance != FALSE) ? $_sock_instance->recv() : FALSE;
+                $_tmp_stream        =   ($_sock_instance != FALSE) ? $_sock_instance->recv() : FALSE;
             } else {
-                $_response_eof          =   TRUE;
-                $_tmp_stream            =   FALSE;
+                $_response_eof      =   TRUE;
+                $_tmp_stream        =   FALSE;
             }
 
         } while (
