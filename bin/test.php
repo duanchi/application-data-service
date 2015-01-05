@@ -10,6 +10,7 @@
 
 
 
+var_dump(dns_get_record('www.ggle.com'));
 
 
 
@@ -29,10 +30,9 @@
 
 
 
+//$_handle = new HTTPTest();
 
-$_handle = new HTTPTest();
-
-$_handle->go();
+//$_handle->go();
 
 class HTTPTest
 {

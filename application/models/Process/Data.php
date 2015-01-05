@@ -47,16 +47,14 @@ class DataModel {
                 //PARSE PARAMETERS
 
                 //SWOOLEING
-                \IO\HTTP::add_request(  $_parameters->request->uri,
-                                        [
+                \IO\HTTP::add_request(  [
+                                            'uri'       =>  $_parameters->request->uri,
                                             'method'    =>  HTTP_GET,
                                             'host'      =>  '127.0.0.1'
                                         ]);
 
-                \IO\HTTP::handle();
-                /*$_handle    = new \IO\HTTP($_parameters->request->uri);
-                $_handle->onReady(function(){return;});
-                $__RESULT   = $_handle->execute(); */
+                //\IO\HTTP::handle();
+
                 break;
         }
 

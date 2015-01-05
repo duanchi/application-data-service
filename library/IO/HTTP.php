@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: fate
+ * User: duanchi
  * Date: 14/12/24
  * Time: 下午5:43
  */
@@ -26,18 +26,25 @@ class HTTP
     CONST CONNECT_TIMEOUT           =   0.5;
     CONST READ_TIMEOUT              =   0.6;
 
-    public  static function add_request($_uri, $_options = []) {
+    public  static function add_request($_options = []) {
 
         $_http_option           =   [
                                         'method'    =>  HTTP_GET,
                                         'version'   =>  'HTTP/1.1',
                                         'timeout'   =>  10,
                                         'request'   =>  NULL,
-                                        'host'      =>  ''
+                                        'host'      =>  '',
+                                        'uri'       =>  '',
+                                        'headers'   =>  []
                                     ];
         $__RESULT               =   make_uuid($_http_option['method']);
+        $_CRLF                  =   self::CRLF;
+        $_SEPARATOR             =   self::SEPARATOR;
 
         foreach ($_http_option as $_key => $_value) isset($_options[$_key]) ? $_http_option[$_key] = $_options[$_key] : FALSE;
+
+        //CHECK OPTOINS
+        $_REQUEST_URI           =   parse_url($_http_option['uri']);
 
         /*
          * CHECK NESS OPTONS
@@ -53,42 +60,56 @@ class HTTP
             case HTTP_PATCH : $_http_option['method']   =   'PATCH'   ; break;
         }
 
-        $_uri   = '/env.php';
-        $_host  = 'http://api.ads.devel';
+        $_request_path              =   (   isset($_REQUEST_URI['path'])
+                                            and
+                                            !empty($_REQUEST_URI['path'])
+                                        ) ?
+                                            $_REQUEST_URI['path'] : '/';
 
         //PACKAGE HTTP(S) REQUEST LINE
-        /*$_socket_package        =   $_http_option['method'].
-            self::SPACE.
-            $_uri.
-            self::SPACE.
-            $_http_option['version'].
-            self::BR;*/
+        $_socket_package            =   $_http_option['method'] .
+                                        $_SEPARATOR .
+                                        $_request_path .
+                                        $_SEPARATOR .
+                                        $_http_option['version'] .
+                                        $_CRLF;
 
         //PACKAGE HTTP(S) REQUEST HEADER
-        //$_socket_package       .=  'Host: ' . $_host;
+        $_socket_package           .=   'Host: '.$_REQUEST_URI['host'] . $_CRLF;
+
+        if (!empty($_http_option['headers'])) {
+            foreach($_http_option['headers'] as $_header)
+                $_socket_package   .=   $_header . $_CRLF;
+        }
+
+
 
         //PACKAGE HTTP(S) REQUEST BODY
 
-        $_socket_package    = 'GET /env.php HTTP/1.1
-Host: api.ads.devel
-Connection: keep-alive
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36
-Referer: http://baidu.com/
-Accept-Encoding: gzip, deflate, sdch
-Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4
-Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
+        //$_socket_package    = 'GET /env.php HTTP/1.1
+//Host: api.ads.devel
+//Connection: keep-alive
+//Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+//User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36
+//Referer: http://baidu.com/
+//Accept-Encoding: gzip, deflate, sdch
+//Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4
+//Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
 
-';
+//';
+
 
         self::$_requests[$__RESULT] =   [
                                             'host'      => $_http_option['host'],
-                                            'port'      => '80',
+                                            'port'      => isset($_REQUEST_URI['port'])
+                                                            and
+                                                           !empty($_REQUEST_URI['port']) ?
+                                                            $_REQUEST_URI['port'] : 80,
                                             'timeout'   => '10',
                                             'package'   => $_socket_package
                                         ];
-
-        return $__RESULT;
+        //return $__RESULT;
+        return self::$_requests;
     }
 
     public  static function handle() {
@@ -141,6 +162,7 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
                                             'body'      => '',
                                             'body-length'   => 0
                                         ];
+        $_gzipped                   =   FALSE;
         //EXPLODE STREAM HEADER AND BODY
         $_tmp_stream                =   explode(self::CRLF.self::CRLF, $_instance->recv(), 2);
 
@@ -184,17 +206,31 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
                 and
                 isset($__RESULT['header']['content-length'])
             ) {
-
                 $__RESULT           =   array_merge(
                                             $__RESULT,
                                             self::execute_body_with_content_length($_instance->recv(), $__RESULT['header']['content-length'], $_instance, $_gzipped)
                                         );
                 break;
             }
-            //HTTP 1.1 NORMAL
+            //HTTP 1.1\1.0 NORMAL
+            if (
+                $__RESULT['version'] == HTTP_VERSION_11
+                or
+                $__RESULT['version'] == HTTP_VERSION_10
+            ) {
+                $__RESULT           =   array_merge(
+                                            $__RESULT,
+                                            self::execute_body_normal($_instance->recv(), $_gzipped)
+                                        );
+                break;
+            }
 
         } while (FALSE);
 
+        if ($_gzipped) {
+            $__RESULT['body']       =   self::decompress($__RESULT['body']);
+            $__RESULT['body-length']=   strlen($__RESULT['body']);
+        }
 
         return $__RESULT;
     }
@@ -231,18 +267,34 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
         return $__RESULT;
     }
 
+    private static function execute_body_normal($_stream, $_gzipped = FALSE) {
+        $__RESULT                   =   [
+                                            'body'          => '',
+                                            'body_length'   => 0
+                                        ];
+        $__RESULT['body']           =   $_stream;
+        $__RESULT['body-length']    =   strlen($_stream);
+
+        return $__RESULT;
+    }
+
     private static function execute_body_with_content_length($_stream, $_content_length, $_sock_instance = FALSE, $_gzipped = FALSE) {
         $__RESULT                   =   [
                                             'body'          => '',
                                             'body_length'   => 0
                                         ];
         $__RESULT['body']           =   $_stream;
-        $_stream_length             =   strlen($_stream);
-        $__RESULT['body-length']    =   ($_stream_length == $_content_length) ?
-                                            $_content_length
-                                            :
-                                            strlen($_stream);
+        $__RESULT['body-length']   +=   strlen($_stream);
 
+        parse_extra_stream:
+        if ($__RESULT['body-length'] < $_content_length) {
+            $_tmp_stream            =   $_sock_instance->recv();
+            $__RESULT['body']      .=   $_tmp_stream;
+            $__RESULT['body-length']   +=   strlen($_tmp_stream);
+            goto parse_extra_stream;
+        }
+
+        return $__RESULT;
     }
 
     private static function execute_body_type_chunked($_stream, $_sock_instance = FALSE, $_gzipped = FALSE) {
@@ -282,6 +334,23 @@ Cookie: BAIDUID=861720F2CFE8CCE349580E417B3BF241:FG=1
                         ($_tmp_stream == FALSE)
                     )
                 );
+
+        return $__RESULT;
+    }
+
+    private static function decompress($_stream, $_compress_type = COMPRESS_TYPE_GZIP) {
+        $__RESULT                   =   FALSE;
+
+        switch ($_compress_type) {
+            case COMPRESS_TYPE_ZIP:
+
+                break;
+
+            case COMPRESS_TYPE_GZIP:
+            default:
+                $__RESULT           =   gzdecode($_stream);
+                break;
+        }
 
         return $__RESULT;
     }
