@@ -45,12 +45,13 @@ class DataModel {
             case URI_SCHEME_HTTP:
             default:
                 //PARSE PARAMETERS
+                if (!isset($_parameters->request->host)) \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
 
                 //SWOOLEING
                 \IO\HTTP::add_request(  [
                                             'uri'       =>  $_parameters->request->uri,
                                             'method'    =>  HTTP_GET,
-                                            'host'      =>  '127.0.0.1'
+                                            'host'      =>  $_parameters->request->host
                                         ]);
 
                 //\IO\HTTP::handle();

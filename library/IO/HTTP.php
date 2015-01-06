@@ -101,15 +101,16 @@ class HTTP
 
         self::$_requests[$__RESULT] =   [
                                             'host'      => $_http_option['host'],
-                                            'port'      => isset($_REQUEST_URI['port'])
-                                                            and
-                                                           !empty($_REQUEST_URI['port']) ?
+                                            'port'      => (    isset($_REQUEST_URI['port'])
+                                                                    and
+                                                                !empty($_REQUEST_URI['port'])
+                                                            ) ?
                                                             $_REQUEST_URI['port'] : 80,
                                             'timeout'   => '10',
                                             'package'   => $_socket_package
                                         ];
-        //return $__RESULT;
-        return self::$_requests;
+        var_dump(self::$_requests);
+        return $__RESULT;
     }
 
     public  static function handle() {
