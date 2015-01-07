@@ -54,7 +54,7 @@ class DataModel {
                                             'host'      =>  $_parameters->request->host
                                         ]);
 
-                //\IO\HTTP::handle();
+                var_dump(\IO\HTTP::handle());
 
                 break;
         }

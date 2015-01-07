@@ -82,6 +82,8 @@ class HTTP
                 $_socket_package   .=   $_header . $_CRLF;
         }
 
+        $_socket_package           .=    $_CRLF;
+
 
 
         //PACKAGE HTTP(S) REQUEST BODY
@@ -128,9 +130,11 @@ class HTTP
                 $_connect_status    = $_socket_handle->connect($_request['host'], $_request['port'], $_connect_timeout, 0);
 
                 if(!$_connect_status) {
-                    echo "Connect Server fail.errCode=".$_socket_handle->errCode;
+                    file_put_contents(APPLICATION_PATH. '/cache/cache.log', "Connect Server fail.errCode=".$_socket_handle->errCode."\r\n\r\n\r\n", FILE_APPEND);
+                    exit();
                 } else {
                     $_socket_handle->send($_request['package']);
+                    file_put_contents(APPLICATION_PATH. '/cache/cache.log', 'aaa44'."\r\n\r\n\r\n", FILE_APPEND);
                     $_socket_instances[$_key] = $_socket_handle;
                 }
             }
@@ -144,7 +148,10 @@ class HTTP
                 if($_client_left > 0) {
 
                     foreach($_socket_instances as $_key => $_instance) {
-                        $__RESULT[$_key]                = self::execute_receive($_instance);
+                        $_tmp = $_instance->recv();
+                        var_dump($_tmp);
+                        $_instance->close();
+                        //$__RESULT[$_key]                = self::execute_receive($_instance);
                         unset($_socket_instances[$_key]);
                     }
                 }
@@ -166,6 +173,7 @@ class HTTP
         $_gzipped                   =   FALSE;
         //EXPLODE STREAM HEADER AND BODY
         $_tmp_stream                =   explode(self::CRLF.self::CRLF, $_instance->recv(), 2);
+
 
         if (count($_tmp_stream) == 2) {
 
@@ -233,6 +241,7 @@ class HTTP
             $__RESULT['body-length']=   strlen($__RESULT['body']);
         }
 
+        var_dump($__RESULT);
         return $__RESULT;
     }
 
