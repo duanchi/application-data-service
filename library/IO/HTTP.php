@@ -148,10 +148,7 @@ class HTTP
                 if($_client_left > 0) {
 
                     foreach($_socket_instances as $_key => $_instance) {
-                        $_tmp = $_instance->recv();
-                        var_dump($_tmp);
-                        $_instance->close();
-                        //$__RESULT[$_key]                = self::execute_receive($_instance);
+                        $__RESULT[$_key]                = self::execute_receive($_instance);
                         unset($_socket_instances[$_key]);
                     }
                 }
@@ -200,6 +197,8 @@ class HTTP
             if (
                 $__RESULT['version'] == HTTP_VERSION_11
                 and
+                isset($__RESULT['header']['transfer-encoding'])
+                and
                 $__RESULT['header']['transfer-encoding'] == 'chunked'
             ) {
                 $__RESULT           =   array_merge(
@@ -217,7 +216,7 @@ class HTTP
             ) {
                 $__RESULT           =   array_merge(
                                             $__RESULT,
-                                            self::execute_body_with_content_length($_instance->recv(), $__RESULT['header']['content-length'], $_instance, $_gzipped)
+                                            self::execute_body_with_content_length($_tmp_response_body, $__RESULT['header']['content-length'], $_instance, $_gzipped)
                                         );
                 break;
             }
@@ -229,7 +228,7 @@ class HTTP
             ) {
                 $__RESULT           =   array_merge(
                                             $__RESULT,
-                                            self::execute_body_normal($_instance->recv(), $_gzipped)
+                                            self::execute_body_normal($_tmp_response_body, $_gzipped)
                                         );
                 break;
             }
@@ -241,7 +240,6 @@ class HTTP
             $__RESULT['body-length']=   strlen($__RESULT['body']);
         }
 
-        var_dump($__RESULT);
         return $__RESULT;
     }
 
@@ -252,15 +250,17 @@ class HTTP
                                             'header'    => [],
                                             'version'   => '',
                                             'status'    => '',
+                                            'status-code'   =>  '',
                                         ];
         $_tmp_header                =   explode(self::CRLF, $_stream);
         $__RESULT['line']           =   array_shift($_tmp_header);
-        $_tmp_line                  =   explode(' ', $__RESULT['line'], 2);
+        $_tmp_line                  =   explode(' ', $__RESULT['line'], 3);
 
-        if (count($_tmp_line) == 2) {
+        if (count($_tmp_line) == 3) {
 
             $__RESULT['version']    =   $_tmp_line[0];
-            $__RESULT['status']     =   $_tmp_line[1];
+            $__RESULT['status-code']=   $_tmp_line[1];
+            $__RESULT['status']     =   $_tmp_line[2];
 
         } else \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
 
@@ -289,20 +289,23 @@ class HTTP
     }
 
     private static function execute_body_with_content_length($_stream, $_content_length, $_sock_instance = FALSE, $_gzipped = FALSE) {
+
         $__RESULT                   =   [
                                             'body'          => '',
-                                            'body_length'   => 0
+                                            'body-length'   => 0
                                         ];
         $__RESULT['body']           =   $_stream;
         $__RESULT['body-length']   +=   strlen($_stream);
 
-        parse_extra_stream:
+
+        //@todo timeout;
+        /*parse_extra_stream:
         if ($__RESULT['body-length'] < $_content_length) {
             $_tmp_stream            =   $_sock_instance->recv();
             $__RESULT['body']      .=   $_tmp_stream;
             $__RESULT['body-length']   +=   strlen($_tmp_stream);
-            goto parse_extra_stream;
-        }
+            //goto parse_extra_stream;
+        }*/
 
         return $__RESULT;
     }
