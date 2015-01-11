@@ -28,6 +28,7 @@ class ConfigModel {
         $__RESULT   = FALSE;
 
         $_tmp_config    = get_yaf_config(ADS_APPS_CONFIG . DIRECTORY_SEPARATOR . $_app->appkey . '.ini');
+
         (isset($_tmp_config->application->licence) && $_tmp_config->application->licence == $_app->licence) ? $__RESULT = $_tmp_config : FALSE;
 
         return $__RESULT;

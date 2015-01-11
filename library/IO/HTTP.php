@@ -135,7 +135,6 @@ class HTTP
                     exit();
                 } else {
                     $_socket_handle->send($_request['package']);
-                    file_put_contents(APPLICATION_PATH. '/cache/cache.log', 'aaa44'."\r\n\r\n\r\n", FILE_APPEND);
                     $_socket_instances[$_key] = $_socket_handle;
                 }
             }
@@ -168,7 +167,7 @@ class HTTP
                                             'body'      => '',
                                             'body-length'   => 0
                                         ];
-        $_gzipped                   =   FALSE;
+        $_GZIPPED                   =   FALSE;
         //EXPLODE STREAM HEADER AND BODY
         $_tmp_stream                =   explode(self::CRLF.self::CRLF, $_instance->recv(), 2);
 
@@ -192,58 +191,14 @@ class HTTP
                                             self::execute_response_package($_tmp_response_body, $_instance, $__RESULT['header'])
                                         );
 
-        /*do {
+        $_GZIPPED               =   (
+                                        isset($__RESULT['header']['content-encoding'])
+                                        and
+                                        $__RESULT['header']['content-encoding'] == 'gzip'
+                                    ) ?
+                                        TRUE : FALSE;
 
-            $_gzipped               =   (
-                                            isset($__RESULT['header']['content-encoding'])
-                                            and
-                                            $__RESULT['header']['content-encoding'] == 'gzip'
-                                        ) ?
-                                            TRUE : FALSE;
-
-            //HTTP 1.1 WITH TYPE CHUNKED
-            if (
-                $__RESULT['version'] == HTTP_VERSION_11
-                and
-                isset($__RESULT['header']['transfer-encoding'])
-                and
-                $__RESULT['header']['transfer-encoding'] == 'chunked'
-            ) {
-                $__RESULT           =   array_merge(
-                                            $__RESULT,
-                                            self::execute_body_type_chunked($_tmp_response_body, $_instance, $_gzipped)
-                                        );
-                break;
-            }
-
-            //HTTP 1.1 NORMAL WITH CONTENT-LENGTH
-            if (
-                $__RESULT['version'] == HTTP_VERSION_11
-                and
-                isset($__RESULT['header']['content-length'])
-            ) {
-                $__RESULT           =   array_merge(
-                                            $__RESULT,
-                                            self::execute_body_with_content_length($_tmp_response_body, $__RESULT['header']['content-length'], $_instance, $_gzipped)
-                                        );
-                break;
-            }
-            //HTTP 1.1\1.0 NORMAL
-            if (
-                $__RESULT['version'] == HTTP_VERSION_11
-                or
-                $__RESULT['version'] == HTTP_VERSION_10
-            ) {
-                $__RESULT           =   array_merge(
-                                            $__RESULT,
-                                            self::execute_body_normal($_tmp_response_body, $_gzipped)
-                                        );
-                break;
-            }
-
-        } while (FALSE);*/
-
-        if ($_gzipped) {
+        if ($_GZIPPED) {
             $__RESULT['body']       =   self::decompress($__RESULT['body']);
             $__RESULT['body-length']=   strlen($__RESULT['body']);
         }
@@ -287,130 +242,90 @@ class HTTP
 
     private static function execute_response_package($_stream, $_sock_instance, $_header) {
 
-        $__RESULT                   =   [
-                                            'body'          =>  $_stream,
-                                            'body-length'   =>  0
-                                        ];
+        $__RESULT                       =   [
+                                                'body'          =>  $_stream,
+                                                'body-length'   =>  0
+                                            ];
 
-        $__KEEP_ALIVE               =   isset($_header['connection'])
-                                        and
-                                        $_header['connection'] == 'keep-alive';
-        $__CHUNKED                  =   isset($_header['transfer-encoding'])
-                                        and
-                                        $_header['transfer-encoding'] == 'chunked';
-        $__CONTENT_LENGTH           =   isset($_header['content_length'])
-                                        ? $_header['content_length'] : FALSE;
+        $__KEEP_ALIVE                   =   (   isset($_header['connection'])
+                                                and
+                                                $_header['connection'] == 'keep-alive'
+                                            ) ?
+                                                1 : 0;
+        $__CHUNKED                      =   (   isset($_header['transfer-encoding'])
+                                                and
+                                                $_header['transfer-encoding'] == 'chunked'
+                                            ) ?
+                                                2 : 0;
+        $__CONTENT_LENGTH               =   isset($_header['content_length'])
+                                              ?
+                                                $_header['content_length'] : FALSE;
 
 
-        do {
-            if ($__KEEP_ALIVE
-                and
-                $__CHUNKED
-            ) {
+        switch($__CHUNKED + $__KEEP_ALIVE) {
+
+            case    3://$__CHUNKED + $__KEEP_ALIVE
 
                 execute_response_keep_alive_and_chunked :
 
-                $_tmp_stream        =   $_sock_instance->recv();
-                $__RESULT['body']  .=   $_tmp_stream;
+                $_tmp_stream = $_sock_instance->recv();
+                $__RESULT['body']      .=   $_tmp_stream;
 
                 if (!preg_match('/[\r\n]0[\r\n]/', $_tmp_stream))
                     goto execute_response_keep_alive_and_chunked;
+                else {
+                    list ($__RESULT['body'], $__RESULT['chunk-footer']) =   self::parse_chunk_footer($__RESULT['body']);
+                }
+                $__RESULT['body']       =   preg_replace('/[\r\n]?[0-9A-Fa-f]+[\r\n]/', '', $__RESULT['body']);
 
-                $__RESULT['body']   =   preg_replace('/[\r\n][0-9A-F]+[\r\n]/', '', $__RESULT['body']);
+                break;
 
-            } elseif ($__CHUNKED) {
+            case    2://$__CHUNKED
 
                 execute_response_chunked :
 
-                $_tmp_stream        =   $_sock_instance->recv();
-                $__RESULT['body']  .=   $_tmp_stream;
+                $_tmp_stream = $_sock_instance->recv();
+                $__RESULT['body']      .=   $_tmp_stream;
 
                 if ($_sock_instance != FALSE)
                     goto execute_response_chunked;
 
-                $__RESULT['body']   =   preg_replace('/[\r\n][0-9A-F]+[\r\n]/', '', $__RESULT['body']);
-            } elseif ($__KEEP_ALIVE) {
+                $__RESULT['body']       =   preg_replace('/[\r\n]?[0-9A-Fa-f]+[\r\n]/', '', $__RESULT['body']);
 
-            } else {
+                break;
 
-            }
-        } while(FALSE);
+            case    1://$__KEEP_ALIVE
+
+                if ($__CONTENT_LENGTH !== FALSE) {
+
+                    $__RESULT['body']   =   $_stream;
+                    $_tmp_length        =   strlen($_stream);
+                    $_tmp_stream        =   '';
+
+                    execute_response_with_content_length:
+
+                    if ($__CONTENT_LENGTH > $_tmp_length) {
+
+                        $_tmp_stream        =   $_sock_instance->recv();
+                        $_tmp_length       +=   strlen($_tmp_stream);
+                        $__RESULT['body']  .=    $_tmp_stream;
+
+                        goto execute_response_with_content_length;
+                    }
+
+                    $__RESULT['body-length']    =   $_tmp_length;
+                }
+
+                break;
+
+            case    0://$__NONE
+
+                $__RESULT['body']       =   $_stream;
+                $__RESULT['body-length']=   strlen($_stream);
+                break;
+        }
 
         $__RESULT['body-length']    =   strlen($__RESULT['body']);
-
-        return $__RESULT;
-    }
-
-    private static function execute_body_normal($_stream, $_gzipped = FALSE) {
-        $__RESULT                   =   [
-                                            'body'          => '',
-                                            'body_length'   => 0
-                                        ];
-        $__RESULT['body']           =   $_stream;
-        $__RESULT['body-length']    =   strlen($_stream);
-
-        return $__RESULT;
-    }
-
-    private static function execute_body_with_content_length($_stream, $_content_length, $_sock_instance = FALSE, $_gzipped = FALSE) {
-
-        $__RESULT                   =   [
-                                            'body'          => '',
-                                            'body-length'   => 0
-                                        ];
-        $__RESULT['body']           =   $_stream;
-        $__RESULT['body-length']   +=   strlen($_stream);
-
-
-        //@todo timeout;
-        /*parse_extra_stream:
-        if ($__RESULT['body-length'] < $_content_length) {
-            $_tmp_stream            =   $_sock_instance->recv();
-            $__RESULT['body']      .=   $_tmp_stream;
-            $__RESULT['body-length']   +=   strlen($_tmp_stream);
-            //goto parse_extra_stream;
-        }*/
-
-        return $__RESULT;
-    }
-
-    private static function execute_body_type_chunked($_stream, $_sock_instance = FALSE, $_gzipped = FALSE) {
-
-        $__RESULT                   =   [
-                                            'body'          => '',
-                                            'body-length'   => 0
-                                        ];
-        $_response_eof              =   FALSE;
-        $_tmp_stream                =   $_stream;
-
-        do {
-            parse_stream:
-
-            $_tmp_current_stream    =   explode(self::CRLF, $_tmp_stream, 2);
-            $_tmp_current_stream_len=   hexdec($_tmp_current_stream[0]);
-
-            if ($_tmp_current_stream_len != 0) {
-
-                $_tmp_stream        =   substr($_tmp_current_stream[1], $_tmp_current_stream_len + 2);
-                $_tmp_current_stream=   substr($_tmp_current_stream[1], 0, $_tmp_current_stream_len);
-                $__RESULT['body']  .=   $_tmp_current_stream;
-                $__RESULT['body-length']   +=   $_tmp_current_stream_len;
-
-                if (!empty($_tmp_stream))   goto parse_stream;
-
-                $_tmp_stream        =   ($_sock_instance != FALSE) ? $_sock_instance->recv() : FALSE;
-            } else {
-                $_response_eof      =   TRUE;
-                $_tmp_stream        =   FALSE;
-            }
-
-        } while (
-                    !(
-                        $_response_eof
-                        or
-                        ($_tmp_stream == FALSE)
-                    )
-                );
 
         return $__RESULT;
     }
@@ -428,6 +343,12 @@ class HTTP
                 $__RESULT           =   gzdecode($_stream);
                 break;
         }
+
+        return $__RESULT;
+    }
+
+    private static function parse_chunk_footer($_stream) {
+        $__RESULT                   =   explode(self::CHUNK_FOOTER, $_stream, 2);
 
         return $__RESULT;
     }
