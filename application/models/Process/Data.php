@@ -22,12 +22,16 @@ class DataModel {
         //FETCH CONF WITH URI OR KEY
         foreach($_conf->roles as $_tmp_value) {
             if ($_request['key'] == NULL && $_tmp_value->request->uri == $_request['uri']) {
-                $__RESULT  = $_tmp_value;
-                break;
+
             } elseif ($_request['key'] != NULL && $_tmp_value->key == $_request['key']) {
-                $__RESULT  = $_tmp_value;
-                break;
-            }
+
+            } else goto no_match_role;
+
+            $__RESULT  = $_tmp_value;
+            $__RESULT->request->host = self::parse_host($_request['uri'], $_conf);
+
+            no_match_role:
+
         }
 
         return $__RESULT;
@@ -44,6 +48,9 @@ class DataModel {
 
             case URI_SCHEME_HTTP:
             default:
+                //PARSE HOST
+
+
                 //PARSE PARAMETERS
                 if (!isset($_parameters->request->host)) \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
 
@@ -60,7 +67,11 @@ class DataModel {
                 break;
         }
 
+        return $__RESULT;
+    }
 
+    private static function parse_host($_uri, $_conf) {
+        $__RESULT           =   FALSE;
 
         return $__RESULT;
     }
