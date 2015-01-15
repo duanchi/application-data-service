@@ -28,12 +28,13 @@ class DataModel {
             } else goto no_match_role;
 
             $__RESULT  = $_tmp_value;
-            $__RESULT->request->host = self::parse_host($_request['uri'], $_conf);
 
             no_match_role:
 
         }
 
+        $__RESULT->request->host = self::parse_host($_request['uri'], $_conf);
+        
         return $__RESULT;
     }
 	
@@ -62,7 +63,7 @@ class DataModel {
                                         ]);
 
                 //\IO\HTTP::handle();
-                var_dump(\IO\HTTP::handle());
+                //var_dump(\IO\HTTP::handle());
 
                 break;
         }
