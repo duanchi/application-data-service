@@ -38,8 +38,8 @@ class ConfigModel {
 
             $_h_conf            =   get_yaf_config($_conf_directory . 'conf.h.ini');
 
-            if (isset($_h_conf->etc->constent))
-                foreach ($_h_conf->etc->constent as $_key => $_constant) define($_key, $_constant);
+            if (isset($_h_conf->etc->constant))
+                foreach ($_h_conf->etc->constant as $_key => $_constant) define($_key, $_constant);
 
             $_conf              =   get_yaf_config($_conf_directory . 'conf.ini');
 
@@ -50,7 +50,6 @@ class ConfigModel {
             $__RESULT           =   $_conf;
         }
 
-        //var_dump($__RESULT);
         return $__RESULT;
     }
 }

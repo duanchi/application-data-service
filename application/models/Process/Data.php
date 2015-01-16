@@ -34,7 +34,7 @@ class DataModel {
         }
 
         $__RESULT->request->host = self::parse_host($_request['uri'], $_conf);
-        
+
         return $__RESULT;
     }
 	
