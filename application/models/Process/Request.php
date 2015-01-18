@@ -51,13 +51,16 @@ class RequestModel {
         //URI & SCHEME
         $_tmp_request_uri           =   explode('|ads?', ltrim($_request_uri, '/'));
 
-        var_dump($_SERVER);
-
-        $_tmp_uri_scheme            =   strtoupper(parse_url($_tmp_request_uri[0], PHP_URL_SCHEME));
-        $_tmp_uri_scheme            =   (   defined('URI_SCHEME_' . $_tmp_uri_scheme)
+        if (strpos($_tmp_request_uri[0], '~') === 0) {
+            $__RESULT['key']        =   trim($_tmp_request_uri[0], '~!@#$%^&*()<>?:"}{[]|\\;\',./`-=_+');
+        } else {
+            $_tmp_uri_scheme        =   strtoupper(parse_url($_tmp_request_uri[0], PHP_URL_SCHEME));
+            $_tmp_uri_scheme        =   (   defined('URI_SCHEME_' . $_tmp_uri_scheme)
                                             ?
                                             constant('URI_SCHEME_' . $_tmp_uri_scheme) : NULL
                                         );
+        }
+
 
         !empty($_tmp_request_uri[1]) ? parse_str($_tmp_request_uri[1], $_tmp_ads_parameters) : $_tmp_ads_parameters = [];
 
@@ -90,7 +93,6 @@ class RequestModel {
         //@todo Ranges
         //@todo Domain Response Types
         //@todo Headers
-
 
         return $__RESULT;
     }
