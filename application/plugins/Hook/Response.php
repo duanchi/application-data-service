@@ -14,24 +14,23 @@ class ResponsePlugin extends \Yaf\Plugin_Abstract {
 
     public function dispatchLoopShutdown(\Yaf\Request_Abstract $request, \Yaf\Response_Abstract $response) {
 
+        if ($request->controller == 'Ads') {
 
-        if ($request->controller == 'Api') {
+            $__REQUEST          =   \Yaf\Registry::get('__REQUEST');
+            $__RESPONSE         =   \Yaf\Registry::get('__RESPONSE');
+            $__ECHO             =   '';
 
-            $_REQUEST = \CORE\KEY::get('_REQUEST');
-            $_RESPONSE = \CORE\KEY::get('_RESPONSE');
-            $_ECHO = '';
-
-            switch ($_REQUEST['content-type']) {
+            switch ($__REQUEST['content-type']) {
                 /*case TYPE_JSONP:
                     $_result = ($_callback == NULL ? '' : $_callback) .'('.json_encode($_object, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE).');';
                     break;*/
 
                 case TYPE_MSGPACK:
-                    $_ECHO = msgpack_pack($_RESPONSE);
+                    $_ECHO = msgpack_pack($__RESPONSE);
                     break;
 
                 case TYPE_JSON:
-                    $_ECHO = json_encode($_RESPONSE);
+                    $_ECHO = json_encode($__RESPONSE);
                     break;
 
                 default:
@@ -40,7 +39,7 @@ class ResponsePlugin extends \Yaf\Plugin_Abstract {
             }
 
             \CORE\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
-            \CORE\RESPONSE::set($_ECHO, RESPONSE_TYPE_BODY);
+            \CORE\RESPONSE::set($_ECHO, RESPONSE_BODY);
             \CORE\RESPONSE::respond();
         }
 

@@ -49,10 +49,9 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
         $dispatcher->registerPlugin(new \Hook\AuthenticatePlugin());
         $dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
         $dispatcher->registerPlugin(new \Hook\FetchDataPlugin());
-        /*$dispatcher->registerPlugin(new \Hook\ExtraDataPlugin());
+        //$dispatcher->registerPlugin(new \Hook\ExtraDataPlugin());
         $dispatcher->registerPlugin(new \Hook\ResponsePlugin());
-        $dispatcher->registerPlugin(new \Hook\PostEventPlugin());
-        */
+        //$dispatcher->registerPlugin(new \Hook\PostEventPlugin());
     }
 	
 	/**

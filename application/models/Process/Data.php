@@ -62,8 +62,7 @@ class DataModel {
                                             'host'      =>  $_parameters['request']['host']
                                         ]);
 
-                //\IO\HTTP::handle();
-                //var_dump(\IO\HTTP::handle());
+                $__RESULT   =   \IO\HTTP::handle();
 
                 break;
         }
@@ -151,7 +150,6 @@ class DataModel {
 
         }
 
-        t($_RESULT);
         return $_RESULT;
     }
 }

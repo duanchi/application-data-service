@@ -19,22 +19,21 @@ class AdsController extends Yaf\Controller_Abstract {
 	
 	public function indexAction($_URI = NULL) {
 
-        if (\CORE\KEY::get('_IS_AUTHORIZED')) {
+        if (\Yaf\Registry::get('__IS_AUTHORIZED')) {
 
-            $__REQUEST           = \CORE\KEY::get('_REQUEST');
-            $__APP               = \CORE\KEY::get('_APP');
-            $__API               = \CORE\KEY::get('_API');;
-            $__RESULT            = FALSE;
-            $__RETURN_PACKEGE    = NULL;
+            $__REQUEST          =   \Yaf\Registry::get('__REQUEST');
+            $__APP              =   \Yaf\Registry::get('__APP');
+            $__API              =   \Yaf\Registry::get('__API');
+            $__DATA             =   \Yaf\Registry::get('__DATA');
+            $__RETURN_PACKEGE   =   NULL;
 
+            //PLUGIN PROCESS START -->
 
-            //API PROCESS START -->
-            $_RESULT = \Process\ApiModel::process($_API, $_REQUEST);
-            //API PROCESS END <--
+            //PLUGIN PROCESS END <--
 
             //RESULT PACKAGE START -->
             //接口返回内容封装
-            \CORE\KEY::set('_RESPONSE', \Process\ApiModel::package($_RESULT));
+            \Yaf\Registry::set('__RESPONSE', \Process\ApiModel::package($__DATA));
             //RESULT PACKAGE END <--
 
         }
