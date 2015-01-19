@@ -17,17 +17,37 @@ namespace Process;
 class DataModel {
 
     public static function parse_parameters($_request, $_conf) {
-        $__RESULT           = FALSE;
+        $__RESULT                   =   FALSE;
+        $__matches                  =   [];
 
         //FETCH CONF WITH URI OR KEY
         foreach($_conf['roles'] as $_tmp_value) {
-            if ($_request['key'] == NULL && $_tmp_value['request']['uri'] == $_request['uri']) {
+            if (
+                    $_request['key'] == NULL
+                    and
+                    isset($_tmp_value['request']['type'])
+                    and
+                    $_tmp_value['request']['type'] == 'regex'
+                    and
+                    preg_match_all($_tmp_value['request']['uri'], $_request['uri'], $__matches)
+            ) {
+                $_tmp_value['map']  =   $__matches;
+            } elseif (
+                    $_request['key'] == NULL
+                    and
+                    $_tmp_value['request']['uri'] == $_request['uri']
+            ) {
 
-            } elseif ($_request['key'] != NULL && $_tmp_value['key'] == $_request['key']) {
+            } elseif (
+                    $_request['key'] != NULL
+                    and
+                    $_tmp_value['key'] == $_request['key']
+            ) {
 
             } else goto no_match_role;
 
-            $__RESULT       = $_tmp_value;
+            $__RESULT               =   $_tmp_value;
+            break;
 
             no_match_role:
 
@@ -39,7 +59,7 @@ class DataModel {
     }
 	
 	public static function fetch_raw_data($_parameters) {
-        $__RESULT           = FALSE;
+        $__RESULT           =   FALSE;
 
         //FETCH URI WITH SCHEME
         switch($_parameters['request']['scheme']) {
