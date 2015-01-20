@@ -20,40 +20,8 @@ class DataModel {
         $__RESULT                   =   FALSE;
         $__matches                  =   [];
 
-        //FETCH CONF WITH URI OR KEY
-        foreach($_conf['roles'] as $_tmp_value) {
-            if (
-                    $_request['key'] == NULL
-                    and
-                    isset($_tmp_value['request']['type'])
-                    and
-                    $_tmp_value['request']['type'] == 'regex'
-                    and
-                    preg_match_all($_tmp_value['request']['uri'], $_request['uri'], $__matches)
-            ) {
-                $_tmp_value['map']  =   $__matches;
-            } elseif (
-                    $_request['key'] == NULL
-                    and
-                    $_tmp_value['request']['uri'] == $_request['uri']
-            ) {
-
-            } elseif (
-                    $_request['key'] != NULL
-                    and
-                    $_tmp_value['key'] == $_request['key']
-            ) {
-
-            } else goto no_match_role;
-
-            $__RESULT               =   $_tmp_value;
-            break;
-
-            no_match_role:
-
-        }
-
-        $__RESULT['request']['host'] = self::parse_host($__RESULT['request']['uri'], $_conf['etc']['hosts']);
+        $__RESULT                   =   $_conf['role'];
+        $__RESULT['request']['host']= self::parse_host($_request['uri'], $_conf['etc']['hosts']);
 
         return $__RESULT;
     }
@@ -82,6 +50,7 @@ class DataModel {
                                             'host'      =>  $_parameters['request']['host']
                                         ]);
 
+                \Devel\Timespent::record('PRE-PROC');
                 $__RESULT   =   \IO\HTTP::handle();
 
                 break;
