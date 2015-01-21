@@ -24,12 +24,15 @@ class AdsController extends Yaf\Controller_Abstract {
             $__REQUEST          =   \Yaf\Registry::get('__REQUEST');
             $__APP              =   \Yaf\Registry::get('__APP');
             $__API              =   \Yaf\Registry::get('__API');
+            $__RAW_DATA         =   \Yaf\Registry::get('__RAW_DATA');
             $__DATA             =   \Yaf\Registry::get('__DATA');
             $__RETURN_PACKEGE   =   NULL;
 
             //PLUGIN PROCESS START -->
 
             //PLUGIN PROCESS END <--
+
+            //USE https://github.com/bupt1987/html-parser TO PARSE (X)HTML/XML
 
             //RESULT PACKAGE START -->
             //接口返回内容封装

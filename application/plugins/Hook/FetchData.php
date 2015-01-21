@@ -25,10 +25,7 @@ class FetchDataPlugin extends \Yaf\Plugin_Abstract {
             //FETCH RAW DATA
 			$__RAW_DATA         = 	\Process\DataModel::fetch_raw_data($_data_parameters);
 
-
-			$__DATA		        = 	$__RAW_DATA;
-
-            \Yaf\Registry::set('__DATA', $__DATA);
+            \Yaf\Registry::set('__RAW_DATA', $__RAW_DATA);
 
 
 			//FETCH CONFIG DATA
