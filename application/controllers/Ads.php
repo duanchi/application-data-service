@@ -22,6 +22,7 @@ class AdsController extends Yaf\Controller_Abstract {
         if (\Yaf\Registry::get('__IS_AUTHORIZED')) {
 
             $__REQUEST          =   \Yaf\Registry::get('__REQUEST');
+            $__CONF             =   \Yaf\Registry::get('__CONF');
             $__APP              =   \Yaf\Registry::get('__APP');
             $__API              =   \Yaf\Registry::get('__API');
             $__RAW_DATA         =   \Yaf\Registry::get('__RAW_DATA');
@@ -33,6 +34,7 @@ class AdsController extends Yaf\Controller_Abstract {
             //PLUGIN PROCESS END <--
 
             //USE https://github.com/bupt1987/html-parser TO PARSE (X)HTML/XML
+            \Process\DataModel::parse_data($__RAW_DATA, $__CONF);
 
             //RESULT PACKAGE START -->
             //接口返回内容封装

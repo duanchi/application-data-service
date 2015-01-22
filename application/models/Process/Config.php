@@ -41,13 +41,19 @@ class ConfigModel {
                 foreach ($_h_conf->etc->constant as $_key => $_constant) define($_key, $_constant);
 
             $_conf                  =   get_yaf_config($_conf_directory . 'conf.ini')->toArray();
-            $_role                  =   self::get_request_config($_conf['roles'], $_request);
 
+
+            //PARSE REQUEST ROLES
+            $_role                  =   self::get_request_config($_conf['roles'], $_request);
             unset($_conf['roles']);
 
             if ($_role !== FALSE)
                 $_conf['role']      =   $_role;
 
+            //PARSE RESPONSE-DATA
+            
+
+            //PARSE ETC->HOSTS
             $_conf['etc']['hosts']  =   $_h_conf->etc->hosts->toArray();
 
             $__RESULT               =   $_conf;
