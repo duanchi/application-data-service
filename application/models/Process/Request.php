@@ -26,24 +26,25 @@ class RequestModel {
     public static function get($_http_method, $_request_uri) {
 
         $__RESULT                   =   [
-                                            'method'        => HTTP_GET,
-                                            'uri'           => NULL,
-                                            'key'           => NULL,
-                                            'uri-scheme'    => URI_SCHEME_HTTP,
-                                            'content-type'  => TYPE_JSON,
-                                            'version'       => REQUEST_VERSION_NULL,
-                                            'ranges'        => [
-                                                'columns'       => NULL,
-                                                'order'         => NULL,
-                                                'limit'         => NULL,
-                                            ],
+                                            'id'            =>  make_uuid('REQUEST'),
+                                            'method'        =>  HTTP_GET,
+                                            'uri'           =>  NULL,
+                                            'key'           =>  NULL,
+                                            'uri-scheme'    =>  URI_SCHEME_HTTP,
+                                            'content-type'  =>  TYPE_JSON,
+                                            'version'       =>  REQUEST_VERSION_NULL,
+                                            'ranges'        =>  [
+                                                                    'columns'       => NULL,
+                                                                    'order'         => NULL,
+                                                                    'limit'         => NULL,
+                                                                ],
 
-                                            'access-token'  => NULL,
-                                            'client-token'  => NULL,
-                                            'client-id'     => NULL,
-                                            'client-ip'     => NULL,
+                                            'access-token'  =>  NULL,
+                                            'client-token'  =>  NULL,
+                                            'client-id'     =>  NULL,
+                                            'client-ip'     =>  NULL,
 
-                                            'ads-parameters'=> [],
+                                            'ads-parameters'=>  [],
                                         ];
 
         //MAKE URL PRE-REQUEST
