@@ -6,7 +6,7 @@
  * Time: 下午2:07
  */
 
-namespace DATA;
+namespace Data;
 
 use tidyNode;
 use tidy;
@@ -18,7 +18,7 @@ use tidy;
  * @date: 2013-6-10
  * @version: 1.0
  */
-class XmlParser {
+class HtmlParser {
 
     private $tidy_node = null;
     private $find_rs = array();
@@ -102,12 +102,12 @@ class XmlParser {
                         $rs = $this->seek ($search, $selectors [$c], $level - 1 );
                         if($rs !== false && $idx !== null){
                             if($idx == count($found)){
-                                return new Parser($rs);
+                                return new HtmlParser($rs);
                             }else{
-                                $found[] = new Parser($rs);
+                                $found[] = new HtmlParser($rs);
                             }
                         }elseif($rs !== false){
-                            $found[] = new Parser($rs);
+                            $found[] = new HtmlParser($rs);
                         }
                     }
                     $temp[] = $search;
@@ -442,5 +442,3 @@ class XmlParser {
     }
 
 }
-
-?>

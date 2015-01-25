@@ -28,6 +28,7 @@ class RawDataModel {
 	
 	public static function fetch_raw_data($_parameters) {
         $__RESULT           =   FALSE;
+        $__REQUEST_ID       =   FALSE;
 
         //FETCH URI WITH SCHEME
         switch($_parameters['request']['scheme']) {
@@ -44,14 +45,15 @@ class RawDataModel {
                 if (!isset($_parameters['request']['host'])) \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
 
                 //SWOOLEING
-                \IO\HTTP::add_request(  [
-                                            'uri'       =>  $_parameters['request']['uri'],
+                $__REQUEST_ID=  \IO\HTTP::add_request(  [
+                                            'uri'       =>  $_parameters['request']['uri']['raw'],
                                             'method'    =>  HTTP_GET,
                                             'host'      =>  $_parameters['request']['host']
                                         ]);
 
                 \Devel\Timespent::record('PRE-PROC');
-                $__RESULT   =   \IO\HTTP::handle();
+                if ($__REQUEST_ID != FALSE) $__RESULT   =   \IO\HTTP::handle()[$__REQUEST_ID];
+
 
                 break;
         }

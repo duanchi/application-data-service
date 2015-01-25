@@ -29,7 +29,9 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
         Yaf\Registry::set('__IS_AUTHORIZED', FALSE);
         Yaf\Registry::set(          '__APP', FALSE);
         Yaf\Registry::set(         '__CONF', FALSE);
+        Yaf\Registry::set(     '__TMP_DATA', NULL );
         Yaf\Registry::set(         '__DATA', NULL );
+        Yaf\Registry::set(     '__RAW_DATA', NULL );
         Yaf\Registry::set(       '__RESULT', NULL );
     }
 
