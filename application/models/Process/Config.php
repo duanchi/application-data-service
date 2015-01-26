@@ -16,20 +16,16 @@ namespace Process;
  */
 class ConfigModel {
 
-    private static $__TMP_VAR       =   [];
+    private static $__TMP_VAR                   =   [];
 	
 	public static function parse($_app, $_request) {
-        $__RESULT                   = FALSE;
-        $_tmp_config                = self::get_config($_app, $_request);
-        $__RESULT                   = $_tmp_config;
-
-        return $__RESULT;
+        return self::get_config($_app, $_request);
     }
 
     private static function get_config($_app, $_request) {
-        $__RESULT                   =   FALSE;
-        $_conf_directory            =   ADS_APPS_CONFIG . DIRECTORY_SEPARATOR . $_app->appkey . DIRECTORY_SEPARATOR;
-        $_licence_config            =   get_yaf_config($_conf_directory . 'licence.ini');
+        $__RESULT                               =   FALSE;
+        $_conf_directory                        =   ADS_APPS_CONFIG . DIRECTORY_SEPARATOR . $_app->appkey . DIRECTORY_SEPARATOR;
+        $_licence_config                        =   get_yaf_config($_conf_directory . 'licence.ini');
 
 
         if (    isset($_licence_config->licence->key)
@@ -37,32 +33,33 @@ class ConfigModel {
                 $_licence_config->licence->key == $_app->licence
             ) {
 
-            $_h_conf                =   get_yaf_config($_conf_directory . 'conf.h.ini');
+            $_h_conf                            =   get_yaf_config($_conf_directory . 'conf.h.ini');
 
             if (isset($_h_conf->etc->constant))
                 foreach ($_h_conf->etc->constant as $_key => $_constant) define($_key, $_constant);
 
-            $_conf                  =   get_yaf_config($_conf_directory . 'conf.ini')->toArray();
+            $_conf                              =   get_yaf_config($_conf_directory . 'conf.ini')->toArray();
 
 
             //PARSE REQUEST ROLES
-            $_role                  =   self::get_request_config($_conf['roles'], $_request);
+            $_role                              =   self::get_request_config($_conf['roles'], $_request);
             unset($_conf['roles']);
 
             if ($_role !== FALSE) {
-                $_conf['role']      =   $_role;
+                $_conf['role']                  =   $_role;
 
                 //PARSE RESPONSE-DATA
-                $_conf['role']['data']  =   self::parse_response_data_conf($_conf['role']['data']);
+                if (isset($_conf['role']['data']))
+                    $_conf['role']['data']      =   self::parse_response_data_conf($_conf['role']['data']);
             }
 
             //PARSE ETC->HOSTS
             if (isset($_h_conf->etc->hosts))
-                $_conf['etc']['hosts']  =   $_h_conf->etc->hosts->toArray();
+                $_conf['etc']['hosts']          =   $_h_conf->etc->hosts->toArray();
             else ;//@todo THROW NO HOSTS ERROR
 
 
-            $__RESULT               =   $_conf;
+            $__RESULT                           =   $_conf;
         }
 
         return $__RESULT;
@@ -130,19 +127,22 @@ class ConfigModel {
 
         }
 
+        if ($__RESULT !== FALSE) {
             $__RESULT['request']['uri']         =   [
                                                         'raw'           =>  $__RESULT['request']['uri'],
                                                         'match-type'    =>  $__RESULT['request']['type']
                                                     ];
 
-        if (filter_var($__RESULT['request']['uri']['raw'], FILTER_VALIDATE_URL)) {
-            $__RESULT['request']['uri']         =   array_merge(
+            if (filter_var($__RESULT['request']['uri']['raw'], FILTER_VALIDATE_URL)) {
+                $__RESULT['request']['uri']     =   array_merge(
                                                                     $__RESULT['request']['uri'],
                                                                     parse_url($__RESULT['request']['uri']['raw'])
                                                                 );
-        }
+            }
 
-        $__RESULT['data']['node']               =   self::replace_tmp_var($__RESULT['data']['node'], $__TMP_DATA);
+            if (!empty($__TMP_DATA))
+                $__RESULT['data']['node']       =   self::replace_tmp_var($__RESULT['data']['node'], $__TMP_DATA);
+        }
 
         return $__RESULT;
     }

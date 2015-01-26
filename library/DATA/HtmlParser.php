@@ -185,8 +185,9 @@ class HtmlParser {
      * 获取html的元属值
      * @return string|null
      */
-    public function getAttr($name) {
-        return isset($this->tidy_node->attribute [$name]) ? $this->tidy_node->attribute [$name] : null;
+    public function getAttr($name = null) {
+        if ($name === null) return $this->tidy_node->attribute;
+        else return isset($this->tidy_node->attribute [$name]) ? $this->tidy_node->attribute [$name] : null;
     }
 
     /**

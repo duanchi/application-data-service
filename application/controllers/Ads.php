@@ -36,7 +36,7 @@ class AdsController extends Yaf\Controller_Abstract {
 
             //USE https://github.com/bupt1987/html-parser TO PARSE (X)HTML/XML
             \Devel\Timespent::record('CURL');
-            $__DATA             =   \Process\DataModel::parse_data($__RAW_DATA, $__CONF['role'], $__TMP_DATA);
+            $__DATA             =   \Process\DataModel::parse_data($__RAW_DATA, $__REQUEST, $__CONF['role'], $__TMP_DATA);
             \Devel\Timespent::record('PARSE-HTML');
             //RESULT PACKAGE START -->
             //接口返回内容封装

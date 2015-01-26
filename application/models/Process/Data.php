@@ -16,12 +16,21 @@ namespace Process;
  */
 class DataModel {
 
-    public  static function parse_data($_raw_data, $_conf, $_tmp_data) {
+    public  static function parse_data($_raw_data, $_request, $_conf, $_tmp_data) {
 
         $__RESULT               =   FALSE;
         $_data_type             =   isset($_conf['data']['type'])
                                     ?
                                     $_conf['data']['type'] : ADS_TYPE_STREAM;
+
+        //ETC DATAS
+        $__RESULT['request']            =   [
+            'id'    =>  $_request['id'],
+            'uri'   =>  $_conf['request']['uri'],
+        ];
+
+        if ($__RESULT['request']['uri']['match-type'] == ADS_ROLE_REGEX)
+            $__RESULT['request']['uri']['map']          =   $_tmp_data['uri-regex'];
 
         switch($_data_type) {
             case ADS_TYPE_HTML:
@@ -29,7 +38,7 @@ class DataModel {
                 break;
 
             case ADS_TYPE_JSON:
-
+                $__RESULT['data']       =   json_decode($_raw_data['body'], TRUE);
                 break;
 
 
@@ -39,27 +48,27 @@ class DataModel {
                 break;
         }
 
-        //ETC DATAS
-        $__RESULT['uri']                =   $_conf['request']['uri'];
-
-        if ($__RESULT['uri']['match-type'] == ADS_ROLE_REGEX) {
-            $__RESULT['uri']['map']     =   $_tmp_data['uri-regex'];
-        }
-
-
         return $__RESULT;
     }
 
     private static function parse_html_data($_raw_data, $_conf = NULL) {
 
         $__RESULT                       =   NULL;
+        $_tmp_data                      =   NULL;
         $_data_handle                   =   new \Data\HtmlParser($_raw_data);
 
         foreach($_conf['data']['node'] as $_key => $_node) {
-            $__RESULT[$_key]            =   $_data_handle->find($_node);
+            $_tmp_data                  =   $_data_handle->find($_node);
+
+            if (!empty($_tmp_data)) foreach ($_tmp_data as $_data) {
+                $__RESULT[$_key][]      =   [
+                                                'value'   =>  $_data->getPlainText(),
+                                                'attribute' =>  $_data->getAttr(),
+                                            ];
+            }
         }
 
-        t($__RESULT);
-        //$_ret = $_data_handle->find();
+
+        return $__RESULT;
     }
 }

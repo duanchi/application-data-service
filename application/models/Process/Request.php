@@ -32,6 +32,11 @@ class RequestModel {
                                             'key'           =>  NULL,
                                             'uri-scheme'    =>  URI_SCHEME_HTTP,
                                             'content-type'  =>  TYPE_JSON,
+                                            'request'       =>  NULL,
+                                            'cookie'        =>  NULL,
+                                            'header'        =>  [],
+
+
                                             'version'       =>  REQUEST_VERSION_NULL,
                                             'ranges'        =>  [
                                                                     'columns'       => NULL,
@@ -80,9 +85,9 @@ class RequestModel {
 
 
         //MAKE URL REQUEST RESULT
-        $__RESULT['method']         = constant('HTTP_'.$_http_method);
-        $__RESULT['uri']            = $_tmp_request_uri[0];
-        $__RESULT['ads-parameters'] = $_tmp_ads_parameters;
+        $__RESULT['method']         =   constant('HTTP_'.$_http_method);
+        $__RESULT['uri']            =   $_tmp_request_uri[0];
+        $__RESULT['ads-parameters'] =   $_tmp_ads_parameters;
 
         !empty($_tmp_uri_scheme)                ? $__RESULT['uri-scheme']   = $_tmp_uri_scheme              : NULL ;
         !empty($_tmp_content_type)              ? $__RESULT['content-type'] = $_tmp_content_type            : NULL ;
@@ -93,7 +98,9 @@ class RequestModel {
 
 
         //MAKE HTTP HEADER REQUEST
-        $_tmp_header_request        = [];
+        $_tmp_header_request        =   [];
+
+        $__RESULT['request']   =   file_get_contents('php://input');
 
         //@todo Ranges
         //@todo Domain Response Types
