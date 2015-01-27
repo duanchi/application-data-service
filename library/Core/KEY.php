@@ -20,9 +20,10 @@ define('REGISTRY_KEY_PREFIX'    , 'KEY_');
 
 class KEY {
 
-    private static $_static_handle    = [];
-    private static $_registry_handle  = [];
-    private static $_cache_handle     = [];
+    private static $_static_handle      =   [];
+    private static $_registry_handle    =   [];
+    private static $_cache_handle       =   [];
+    private static $_memory_handle      =   ['instance'=>NULL,'db'=>0];
 
     public static function get($_key, $_scope = KEY_REGISTRY, $_prefix = DEFAULT_PREFIX) {
 
@@ -96,6 +97,10 @@ class KEY {
 
             case KEY_MEMORY:
 
+                if (self::$_memory_handle['instance'] == NULL) {
+                    self::$_memory_handle['instance']   =   new \Redis();
+                    self::$_memory_handle['instance']->connect('127.0.0.1', 6379);
+                }
                 break;
 
             case KEY_CACHE:

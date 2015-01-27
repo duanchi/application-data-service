@@ -215,10 +215,42 @@ class HTTP
 
             $_tmp_header                    =   explode(': ', $_value, 2);
 
-            count($_tmp_header) == 2 ?
-                $__RESULT['header'][strtolower($_tmp_header[0])]   =   strtolower($_tmp_header[1])
-                :
+            if (count($_tmp_header) == 2) {
+                $_header_key                =   strtolower($_tmp_header[0]);
+
+                do {
+                    if (
+                        isset($__RESULT['header'][$_header_key])
+                        and
+                        is_array($__RESULT['header'][$_header_key])
+                    ) {
+                        $__RESULT['header'][$_header_key][] =   $_tmp_header[1];
+
+                        break;
+                    }
+                    if (
+                        isset($__RESULT['header'][$_header_key])
+                        and
+                        !is_array($__RESULT['header'][$_header_key])
+                    ) {
+                        $__RESULT['header'][$_header_key]   =   [
+                                                                    $__RESULT['header'][$_header_key],
+                                                                    $_tmp_header[1]
+                                                                ];
+
+                        break;
+                    }
+                    if (!isset($__RESULT['header'][$_header_key])) {
+                        $__RESULT['header'][$_header_key]   =   $_tmp_header[1];
+
+                        break;
+                    }
+                } while (TRUE);
+
+            } else {
                 $__RESULT['header'][strtolower($_tmp_header[0])]   =   strtolower($_tmp_header[0]);
+            }
+
         }
 
         return $__RESULT;
@@ -233,17 +265,17 @@ class HTTP
 
         $__KEEP_ALIVE                       =   (   isset($_header['connection'])
                                                     and
-                                                    $_header['connection'] == 'keep-alive'
+                                                    strtolower($_header['connection']) == 'keep-alive'
                                                 ) ?
                                                     1 : 0;
         $__CHUNKED                          =   (   isset($_header['transfer-encoding'])
                                                     and
-                                                    $_header['transfer-encoding'] == 'chunked'
+                                                    strtolower($_header['transfer-encoding']) == 'chunked'
                                                 ) ?
                                                     2 : 0;
-        $__CONTENT_LENGTH                   =   isset($_header['content_length'])
+        $__CONTENT_LENGTH                   =   isset($_header['content-length'])
                                                   ?
-                                                    $_header['content_length'] : FALSE;
+                                                    $_header['content-length'] : FALSE;
 
 
         switch($__CHUNKED + $__KEEP_ALIVE) {
@@ -292,6 +324,8 @@ class HTTP
                     execute_response_with_content_length:
 
                     if ($__CONTENT_LENGTH > $_tmp_length) {
+
+
 
                         $_tmp_stream        =   $_sock_instance->recv();
                         $_tmp_length       +=   strlen($_tmp_stream);

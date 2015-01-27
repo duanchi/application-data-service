@@ -32,20 +32,23 @@ class DataModel {
         if ($__RESULT['request']['uri']['match-type'] == ADS_ROLE_REGEX)
             $__RESULT['request']['uri']['map']          =   $_tmp_data['uri-regex'];
 
-        switch($_data_type) {
-            case ADS_TYPE_HTML:
-                $__RESULT['data']       =   self::parse_html_data($_raw_data['body'], $_conf);
-                break;
+        if (isset($_conf['data'])) {
+            switch($_data_type) {
+                case ADS_TYPE_HTML:
+                    if (isset($_conf['data']['node']))
+                        $__RESULT['data']=   self::parse_html_data($_raw_data['body'], $_conf);
+                    break;
 
-            case ADS_TYPE_JSON:
-                $__RESULT['data']       =   json_decode($_raw_data['body'], TRUE);
-                break;
+                case ADS_TYPE_JSON:
+                    $__RESULT['data']   =   json_decode($_raw_data['body'], TRUE);
+                    break;
 
 
-            case ADS_TYPE_STREAM:
-            default:
+                case ADS_TYPE_STREAM:
+                default:
 
-                break;
+                    break;
+            }
         }
 
         return $__RESULT;
