@@ -54,6 +54,21 @@ class DataModel {
         return $__RESULT;
     }
 
+    public  static function package_response($_response_data, $_request) {
+
+        $__RESULT                       =   [
+                                                'DATA'          =>  $_response_data,
+                                                'CONTENT-TYPE'  =>  $_request['content-type'],
+                                                'CALLBACK'      =>  isset($_request['ads_parameters']['callback'])
+                                                                    ?
+                                                                    $_request['ads_parameters']['callback'] : NULL,
+                                                'HEADER'        =>  []
+                                            ];
+
+
+        return $__RESULT;
+    }
+
     private static function parse_html_data($_raw_data, $_conf = NULL) {
 
         $__RESULT                       =   NULL;
