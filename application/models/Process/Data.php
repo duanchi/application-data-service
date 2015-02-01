@@ -18,10 +18,14 @@ class DataModel {
 
     public  static function parse_data($_raw_data, $_request, $_conf, $_tmp_data) {
 
-        $__RESULT               =   FALSE;
-        $_data_type             =   isset($_conf['data']['type'])
-                                    ?
-                                    $_conf['data']['type'] : ADS_TYPE_STREAM;
+        $__RESULT                       =   [
+                                                'request'   =>  [],
+                                                'raw-data'  =>  [],
+                                                'data'      =>  []
+                                            ];
+        $_data_type                     =   isset($_conf['data']['type'])
+                                            ?
+                                            $_conf['data']['type'] : ADS_TYPE_STREAM;
 
         //ETC DATAS
         $__RESULT['request']            =   [
@@ -31,6 +35,9 @@ class DataModel {
 
         if ($__RESULT['request']['uri']['match-type'] == ADS_ROLE_REGEX)
             $__RESULT['request']['uri']['map']          =   $_tmp_data['uri-regex'];
+
+
+        $__RESULT['raw-data']           =   $_raw_data;
 
         if (isset($_conf['data'])) {
             switch($_data_type) {
@@ -57,7 +64,7 @@ class DataModel {
     public  static function package_response($_response_data, $_request, $_conf) {
 
         $__RESULT                       =   [
-                                                'DATA'          =>  $_response_data,
+                                                'DATA'          =>  $_response_data['data'],
                                                 'CONTENT-TYPE'  =>  $_request['content-type'],
                                                 'CALLBACK'      =>  isset($_request['ads_parameters']['callback'])
                                                                     ?
@@ -71,7 +78,10 @@ class DataModel {
         ];
 
         switch($_conf['role']['request']['scheme']) {
+
             case ADS_SCHEME_HTTP:
+
+                if (!isset($_response_data['raw-data']['data']['header']['set-cookie'])) break;
 
                 $_header_set = 1;
                 if (isset($_conf['role']['data']['header']) and !empty($_conf['role']['data']['header'])) {
@@ -80,16 +90,29 @@ class DataModel {
                     (strpos($_conf['role']['data']['header'], ADS_FIELD_RAW)    !== FALSE) ?    $_header_set += 4 : NULL;
                 }
 
+                $_tmp_cookie            =   [];
+
+                foreach ($_response_data['raw-data']['data']['header']['set-cookie'] as $_cookie_node)
+                    $_tmp_cookie[]      =   \http_parse_cookie($_cookie_node);
+
+                t($_tmp_cookie);
                 if ($_header_set & 1) {
-                    $__RESULT['DATA']['COOKIE'] =   $_response_data['header']['set-cookie'];
+                    $__RESULT['DATA']['COOKIE']         =   $_tmp_cookie;
                 }
 
                 if ($_header_set & 2) {
-
+                    $__RESULT['HEADER']['Set-Cookie']   =   str_split(
+                                                                        encrypt(
+                                                                                    ENCRYPT_BASE64,
+                                                                                    \msgpack_pack($_response_data['raw-data']['data']['header']['set-cookie'])
+                                                                               ),
+                                                                        4 * 4096
+                                                                     );
                 }
 
                 if ($_header_set & 4) {
-
+                    !isset($__RESULT['HEADER']['Set-Cookie']) ? $__RESULT['HEADER']['Set-Cookie']   = [] : NULL;
+                    $__RESULT['HEADER']['Set-Cookie']   =   array_merge($__RESULT['HEADER']['Set-Cookie'], $_response_data['raw-data']['data']['header']['set-cookie']);
                 }
 
                 break;

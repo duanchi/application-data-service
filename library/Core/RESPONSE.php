@@ -35,7 +35,12 @@ class RESPONSE {
             case RESPONSE_HEADER:
                 if (is_array($_content)) {
                     foreach($_content as $key => $value) {
-                        self::$__instance->setHeader($key, $value);
+                        if (is_array($value)) {
+                            if ($key == 'Set-Cookie') ;
+                            else foreach($value as $sub_value)
+                                self::$__instance->setHeader($key, $sub_value);
+                        }
+                        else self::$__instance->setHeader($key, $value);
                     }
                 }
                 self::respond();

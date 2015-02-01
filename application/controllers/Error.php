@@ -18,21 +18,13 @@
 class ErrorController extends Yaf\Controller_Abstract {
 
 	public function errorAction($exception) {
-		//$_message = explode('|', $exception->getMessage(), 2);
 
-		//$_error = \Api\MessageCode::get($_message[0]);
-
-		var_dump($exception);
+		t($exception);
         //\CORE\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
         //\CORE\RESPONSE::set($_ECHO, RESPONSE_TYPE_BODY);
         //\CORE\RESPONSE::respond();
 
 		//_fastcgi_finish_request();
-		return FALSE;
-	}
-
-	public function emptyAction() {
-		throw new \Exception('API_ROUTE_ERROR');
 		return FALSE;
 	}
 }

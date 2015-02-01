@@ -1,6 +1,10 @@
 <?php
 //var_dump(filter_var('/^http://localhost/login/login.action(.*)/', FILTER_VALIDATE_REGEXP));
 
+setcookie('a','1');
+setcookie('b','34');
+setcookie('c','g');
+
 
 Timespent::_init();
 var_dump(base64_encode(msgpack_pack([
@@ -24,7 +28,7 @@ Timespent::record('IN-PROC');
 var_dump(Timespent::spent());
 
 
-
+var_dump(get_defined_functions());
 
 
 
