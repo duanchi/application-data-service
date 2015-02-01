@@ -34,12 +34,11 @@ class RESPONSE {
         switch($_scope) {
             case RESPONSE_HEADER:
                 if (is_array($_content)) {
-                    !isset($_content[0]) ? $_content = [$_content] : FALSE;
-                    foreach($_content as $value) {
-                        self::$__instance->setHeader($value[0], $value[1]);
+                    foreach($_content as $key => $value) {
+                        self::$__instance->setHeader($key, $value);
                     }
                 }
-
+                self::respond();
                 break;
 
             case RESPONSE_BODY:

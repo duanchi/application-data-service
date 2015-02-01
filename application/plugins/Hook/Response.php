@@ -20,17 +20,17 @@ class ResponsePlugin extends \Yaf\Plugin_Abstract {
             $__RESPONSE         =   \Yaf\Registry::get('__RESPONSE');
             $__ECHO             =   '';
 
-            switch ($__REQUEST['content-type']) {
+            switch ($__RESPONSE['CONTENT-TYPE']) {
                 case TYPE_JSONP:
-                    $_result = ($__REQUEST['ads-parameters']['callback'] == NULL ? '' : $__REQUEST['ads-parameters']['callback']) .'('.json_encode($__RESPONSE, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE).');';
+                    $_result = ($__RESPONSE['CALLBACK'] == NULL ? '' : $__RESPONSE['CALLBACK']) .'('.json_encode($__RESPONSE['DATA'], JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE).');';
                     break;
 
                 case TYPE_MSGPACK:
-                    $_ECHO = msgpack_pack($__RESPONSE);
+                    $_ECHO = msgpack_pack($__RESPONSE['DATA']);
                     break;
 
                 case TYPE_JSON:
-                    $_ECHO = json_encode($__RESPONSE, JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
+                    $_ECHO = json_encode($__RESPONSE['DATA'], JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
                     break;
 
                 default:
@@ -39,8 +39,8 @@ class ResponsePlugin extends \Yaf\Plugin_Abstract {
             }
 
             \CORE\RESPONSE::initialize($response, RESPONSE_TYPE_YAF);
-            \CORE\RESPONSE::set($_ECHO, RESPONSE_BODY);
-            //\CORE\RESPONSE::respond();
+            \CORE\RESPONSE::set($__RESPONSE['HEADER'], RESPONSE_HEADER);
+            \CORE\RESPONSE::set(               $_ECHO, RESPONSE_BODY  );
         }
 
     }

@@ -54,7 +54,7 @@ class DataModel {
         return $__RESULT;
     }
 
-    public  static function package_response($_response_data, $_request) {
+    public  static function package_response($_response_data, $_request, $_conf) {
 
         $__RESULT                       =   [
                                                 'DATA'          =>  $_response_data,
@@ -65,6 +65,39 @@ class DataModel {
                                                 'HEADER'        =>  []
                                             ];
 
+        $__RESULT['HEADER']             =   [
+                                                'Request-Id'    =>  $_request['id'],
+                                                'Content-Type'  =>  $__RESULT['CONTENT-TYPE'],
+        ];
+
+        switch($_conf['role']['request']['scheme']) {
+            case ADS_SCHEME_HTTP:
+
+                $_header_set = 1;
+                if (isset($_conf['role']['data']['header']) and !empty($_conf['role']['data']['header'])) {
+                    (strpos($_conf['role']['data']['header'], ADS_FIELD_DATA)   === FALSE) ?    $_header_set -= 1 : NULL;
+                    (strpos($_conf['role']['data']['header'], ADS_FIELD_HEADER) !== FALSE) ?    $_header_set += 2 : NULL;
+                    (strpos($_conf['role']['data']['header'], ADS_FIELD_RAW)    !== FALSE) ?    $_header_set += 4 : NULL;
+                }
+
+                if ($_header_set & 1) {
+                    $__RESULT['DATA']['COOKIE'] =   $_response_data['header']['set-cookie'];
+                }
+
+                if ($_header_set & 2) {
+
+                }
+
+                if ($_header_set & 4) {
+
+                }
+
+                break;
+
+            default:
+
+                break;
+        }
 
         return $__RESULT;
     }
