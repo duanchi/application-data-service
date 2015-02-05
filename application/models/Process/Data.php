@@ -93,18 +93,31 @@ class DataModel {
                 $_tmp_cookie            =   [];
 
                 foreach ($_response_data['raw-data']['data']['header']['set-cookie'] as $_cookie_node)
-                    $_tmp_cookie[]      =   \http_parse_cookie($_cookie_node);
+                    $_tmp_cookie[]      =   (new \http\Cookie($_cookie_node))->toArray();
 
-                t($_tmp_cookie);
                 if ($_header_set & 1) {
                     $__RESULT['DATA']['COOKIE']         =   $_tmp_cookie;
                 }
 
                 if ($_header_set & 2) {
+                    $_raw_cookie        =   str_split(
+                                                        encrypt(
+                                                            ENCRYPT_BASE64,
+                                                            \msgpack_pack($__RESULT['DATA']['COOKIE'])
+                                                        ),
+                                                        4 * 4096
+                                                    );
+
+                    foreach($_raw_cookie as $_key => $_cookie_node) {
+                        $_cookie_handle =   new \http\Cookie();
+                        $_cookie_handle->setCookie('ADS-PROXY-'.$_key, $_cookie_node);
+
+                        t($_cookie_handle->toArray());
+                    }
                     $__RESULT['HEADER']['Set-Cookie']   =   str_split(
                                                                         encrypt(
                                                                                     ENCRYPT_BASE64,
-                                                                                    \msgpack_pack($_response_data['raw-data']['data']['header']['set-cookie'])
+                                                                                    \msgpack_pack($__RESULT['DATA']['COOKIE'])
                                                                                ),
                                                                         4 * 4096
                                                                      );
