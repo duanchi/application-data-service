@@ -27,7 +27,7 @@ class DevelPlugin extends Yaf\Plugin_Abstract {
 
 	public function dispatchLoopShutdown(Yaf\Request_Abstract $request, Yaf\Response_Abstract $response) {
 		\Devel\Timespent::record('IN-PROC');
-        header('Dump-spent:'.json_encode(\Devel\Timespent::spent()));
+        header('Dump-spent:'.\Devel\Timespent::spent());
 	}
 	
 	public function preResponse(Yaf\Request_Abstract $request, Yaf\Response_Abstract $response) {

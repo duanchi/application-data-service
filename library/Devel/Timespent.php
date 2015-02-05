@@ -45,17 +45,21 @@ class Timespent {
 
 	private static function _spent($_flag = '')
 	{
-		$time = round((self::$stop_time - self::$start_time) * 1000, 1);
+		$time = round((self::$stop_time - self::$start_time) * 1000, 4);
 		!empty($_flag) ? self::$spend_time[$_flag] = $time : self::$spend_time[] = $time;
 	}
 
 	public static function spent() {
 		self::total();
-		return self::$spend_time;
+		$_result = '';
+		foreach (self::$spend_time as $_key => $_node) {
+			$_result .= '\'' . $_key . ': ' . $_node . 'ms\', ';
+		}
+		return $_result;
 	}
 
 	public static function total() {
-		self::$spend_time['TOTAL'] = round((self::get_microtime() - self::$total_time) * 1000, 1);
+		self::$spend_time['TOTAL'] = round((self::get_microtime() - self::$total_time) * 1000, 4);
 	}
 
 }

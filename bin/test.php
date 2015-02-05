@@ -6,8 +6,9 @@ setcookie('b','34');
 setcookie('c','g');
 
 
+
 Timespent::_init();
-var_dump(base64_encode(msgpack_pack([
+base64_encode(msgpack_pack([
     [
         'BAIDUID'=>'802F68D4DDFE20D1DBB27D8EB3CBB98E:FG=1',
         'expires'=>'Thu, 31-Dec-37 23:55:55 GMT',
@@ -22,19 +23,20 @@ var_dump(base64_encode(msgpack_pack([
         'path'=>'/',
         'domain'=>'.baidu.com'
     ]
-])));
+]));
 Timespent::record('IN-PROC');
 
-var_dump(Timespent::spent());
+//var_dump(Timespent::spent());
 
 $_str = "%u806A%u660E%u7684%u4F60%u4E00%u5B9A%u77E5%u9053%u83B7%u53D6%u4E4B%u540E%u663E%u793A%u7A7A%u767D%u7684%u79D8%u5BC6";
 
-var_dump(unescape($_str));
+//var_dump(unescape($_str));
 
 
+header('spent:' . Timespent::spent());
 
 
-
+//var_dump(microtime());
 
 function unescape($str)
 {
@@ -108,17 +110,21 @@ class Timespent {
 
     private static function _spent($_flag = '')
     {
-        $time = round((self::$stop_time - self::$start_time) * 1000, 1);
+        $time = round((self::$stop_time - self::$start_time) * 1000, 3);
         !empty($_flag) ? self::$spend_time[$_flag] = $time : self::$spend_time[] = $time;
     }
 
     public static function spent() {
         self::total();
-        return self::$spend_time;
+        $_result = '';
+        foreach (self::$spend_time as $_key => $_node) {
+            $_result .= $_key . ': ' . $_node . 'ms, ';
+        }
+        return $_result;
     }
 
     public static function total() {
-        self::$spend_time['TOTAL'] = round((self::get_microtime() - self::$total_time) * 1000, 1);
+        self::$spend_time['TOTAL'] = round((self::get_microtime() - self::$total_time) * 1000, 3);
     }
 
 }
