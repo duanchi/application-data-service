@@ -63,19 +63,19 @@ class DataModel {
 
     public  static function package_response($_response_data, $_request, $_conf) {
 
-        $__RESULT                       =   [
-                                                'DATA'          =>  $_response_data['data'],
-                                                'CONTENT-TYPE'  =>  $_request['content-type'],
-                                                'CALLBACK'      =>  isset($_request['ads_parameters']['callback'])
-                                                                    ?
-                                                                    $_request['ads_parameters']['callback'] : NULL,
-                                                'HEADER'        =>  []
-                                            ];
+        $__RESULT                                           =   [
+                                                                    'DATA'          =>  $_response_data['data'],
+                                                                    'CONTENT-TYPE'  =>  $_request['content-type'],
+                                                                    'CALLBACK'      =>  isset($_request['ads_parameters']['callback'])
+                                                                                        ?
+                                                                                        $_request['ads_parameters']['callback'] : NULL,
+                                                                    'HEADER'        =>  []
+                                                                ];
 
-        $__RESULT['HEADER']             =   [
-                                                'Request-Id'    =>  $_request['id'],
-                                                'Content-Type'  =>  $__RESULT['CONTENT-TYPE'],
-        ];
+        $__RESULT['HEADER']                                 =   [
+                                                                    'Request-Id'    =>  $_request['id'],
+                                                                    'Content-Type'  =>  $__RESULT['CONTENT-TYPE'],
+                            ];
 
         switch($_conf['role']['request']['scheme']) {
 
@@ -90,42 +90,37 @@ class DataModel {
                     (strpos($_conf['role']['data']['header'], ADS_FIELD_RAW)    !== FALSE) ?    $_header_set += 4 : NULL;
                 }
 
-                $_tmp_cookie            =   [];
+                $_tmp_cookie                                =   [];
 
                 foreach ($_response_data['raw-data']['data']['header']['set-cookie'] as $_cookie_node)
-                    $_tmp_cookie[]      =   (new \http\Cookie($_cookie_node))->toArray();
+                    $_tmp_cookie[]                          =   (new \http\Cookie($_cookie_node))->toArray();
 
                 if ($_header_set & 1) {
-                    $__RESULT['DATA']['COOKIE']         =   $_tmp_cookie;
+                    $__RESULT['DATA']['cookie']             =   $_tmp_cookie;
                 }
 
                 if ($_header_set & 2) {
-                    $_raw_cookie        =   str_split(
-                                                        encrypt(
-                                                            ENCRYPT_BASE64,
-                                                            \msgpack_pack($__RESULT['DATA']['COOKIE'])
-                                                        ),
-                                                        4 * 4096
-                                                    );
+                    $_raw_cookie                            =   str_split(
+                                                                            encrypt(
+                                                                                ENCRYPT_BASE64,
+                                                                                \msgpack_pack($__RESULT['DATA']['cookie'])
+                                                                            ),
+                                                                            4 * 4096
+                                                                        );
+
+                    $__RESULT['HEADER']['Set-Cookie']       =   [];
 
                     foreach($_raw_cookie as $_key => $_cookie_node) {
-                        $_cookie_handle =   new \http\Cookie();
-                        $_cookie_handle->setCookie('ADS-PROXY-'.$_key, $_cookie_node);
-
-                        t($_cookie_handle->toArray());
+                        $__RESULT['HEADER']['Set-Cookie'][] =   (new \http\Cookie())
+                                                                    ->setCookie('ADS-PROXY-'.$_key, $_cookie_node)
+                                                                        ->toArray();
                     }
-                    $__RESULT['HEADER']['Set-Cookie']   =   str_split(
-                                                                        encrypt(
-                                                                                    ENCRYPT_BASE64,
-                                                                                    \msgpack_pack($__RESULT['DATA']['COOKIE'])
-                                                                               ),
-                                                                        4 * 4096
-                                                                     );
+
                 }
 
                 if ($_header_set & 4) {
                     !isset($__RESULT['HEADER']['Set-Cookie']) ? $__RESULT['HEADER']['Set-Cookie']   = [] : NULL;
-                    $__RESULT['HEADER']['Set-Cookie']   =   array_merge($__RESULT['HEADER']['Set-Cookie'], $_response_data['raw-data']['data']['header']['set-cookie']);
+                    $__RESULT['HEADER']['Set-Cookie']       =   array_merge($__RESULT['HEADER']['Set-Cookie'], $_tmp_cookie);
                 }
 
                 break;

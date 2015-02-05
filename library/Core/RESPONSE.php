@@ -33,14 +33,29 @@ class RESPONSE {
 
         switch($_scope) {
             case RESPONSE_HEADER:
+
                 if (is_array($_content)) {
-                    foreach($_content as $key => $value) {
-                        if (is_array($value)) {
-                            if ($key == 'Set-Cookie') ;
-                            else foreach($value as $sub_value)
-                                self::$__instance->setHeader($key, $sub_value);
-                        }
-                        else self::$__instance->setHeader($key, $value);
+                    foreach($_content as $_key => $_value) {
+                        if ($_key == 'Set-Cookie') {
+                            !is_array($_value) ? $_value    =   [$_value] : FALSE;
+
+                            foreach($_value as $_sub_value) {
+                                $_cookie_key                =   key($_sub_value['cookies']);
+                                setcookie(
+                                            $_cookie_key,
+                                            $_sub_value['cookies'][$_cookie_key],
+                                            $_sub_value['expires'],
+                                            $_sub_value['path'],
+                                            $_sub_value['domain'],
+                                            $_sub_value['flags'] & \http\Cookie::SECURE     ? TRUE : FALSE,
+                                            $_sub_value['flags'] & \http\Cookie::HTTPONLY   ? TRUE : FALSE
+                                        );
+                            }
+
+                        } elseif (!is_array($_value)) {
+                            self::$__instance->setHeader($_key, $_value);
+
+                        } else self::$__instance->setHeader($_key, current($_value));
                     }
                 }
                 self::respond();
@@ -48,6 +63,7 @@ class RESPONSE {
 
             case RESPONSE_BODY:
             default:
+
             if (is_array($_content)) {
                 self::$__instance->setBody($_content[0], $_content[1]);
             } else {
