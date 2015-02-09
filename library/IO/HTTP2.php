@@ -46,7 +46,7 @@ class HTTP2 {
         }
 
 
-        if(isset($_http_option['host'])) {
+        if(isset($_http_option['host']) and !empty($_http_option['host'])) {
 
             $_http_uri_handle                   =   new \http\Url($_http_option['uri']);
             $_http_option['headers']            =   array_merge($_http_option['headers'], ['Host'=>$_http_uri_handle->host]);
@@ -56,7 +56,6 @@ class HTTP2 {
         }
 
 
-        t($_http_option);
         $_request_handle                    =   new \http\Client\Request(
                                                                             $_http_option['method'],
                                                                             $_http_option['uri'],
@@ -71,7 +70,7 @@ class HTTP2 {
                                         'tcp_keepalive' =>  $_http_option['keepalive']
                                     ]);
 
-        self::$_requests[]                  =   $_request_handle;
+        self::$_requests[$__RESULT]         =   $_request_handle;
 
         return $__RESULT;
     }
@@ -88,18 +87,40 @@ class HTTP2 {
             $_http_handle->enablePipelining(TRUE);
             $_http_handle->enableEvents(TRUE);
 
-            foreach (self::$_requests as $_key => $_request)
+            foreach (self::$_requests as $_key => $_request) {
                 $_http_handle->enqueue($_request);
+                $__RESULT[$_key]            =   NULL;
+            }
 
             while($_http_handle->once())
                 $_http_handle->wait();
 
-            while ($_response = $_http_handle->getResponse()) {
-                $__RESULT                   =   $_response;
-            }
+            while (
+                    list($_key)             =   each($__RESULT)
+                    and
+                    $__RESULT[$_key]        =   self::parse_response($_http_handle->getResponse())
+                  );
         }
 
-        t($__RESULT);
         return $__RESULT;
+    }
+
+    private static function parse_response($_response) {
+
+        if ($_response == FALSE) return FALSE;
+
+        else {
+            $__RESULT                           =   [
+                                                        'line'              =>  '',
+                                                        'header'            =>  $_response->getHeaders(),
+                                                        'version'           =>  $_response->getHttpVersion(),
+                                                        'status'            =>  $_response->getResponseCode(),
+                                                        'status-message'    =>  $_response->getResponseStatus(),
+                                                        'body'              =>  $_response->getBody()->serialize(),
+                                                        'body-length'       =>  $_response->getHeader('Content-length')
+                                                    ];
+
+            return $__RESULT;
+        }
     }
 }

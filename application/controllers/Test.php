@@ -52,14 +52,23 @@ class TestController extends Yaf\Controller_Abstract {
 	}
 
 	public function client() {
-		$__REQUEST_ID       =  \IO\HTTP2::add_request(  [
-			'uri'       =>  'http://www.baidu.com/soadflsd?asldkf=adfasdf&os=d.w',
+		$__REQUEST['b']    =  \IO\HTTP2::add_request(  [
+			'uri'       =>  'http://api.ads.devel/env.php',
 			'method'    =>  HTTP_GET,
-			'host'      =>  '180.76.3.12'
+			'host'      =>  '127.0.0.1'
 		]);
 
+		$__REQUEST['g']    =  \IO\HTTP2::add_request(  [
+			'uri'       =>  'http://api.ads.devel/env.php',
+			'method'    =>  HTTP_GET,
+			'host'      =>  ''
+		]);
+
+
 		\Devel\Timespent::record('PRE-PROC');
-		//if ($__REQUEST_ID != FALSE) $__RESULT['data']   =   \IO\HTTP2::handle();
+		if ($__REQUEST != FALSE) $__RESULT['data']   =   \IO\HTTP2::handle();
+
+		t($__RESULT);
 
 		return FALSE;
 	}
