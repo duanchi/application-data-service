@@ -51,23 +51,16 @@ class TestController extends Yaf\Controller_Abstract {
 		return FALSE;
 	}
 
-	public function clientAction() {
+	public function client() {
+		$__REQUEST_ID       =  \IO\HTTP2::add_request(  [
+			'uri'       =>  'http://www.baidu.com/soadflsd?asldkf=adfasdf&os=d.w',
+			'method'    =>  HTTP_GET,
+			'host'      =>  '180.76.3.12'
+		]);
 
-		$service = [
-			[
-				['V0001'],
-				['order1'],
-				['order','targetnum','18618610010'],
-			]
+		\Devel\Timespent::record('PRE-PROC');
+		//if ($__REQUEST_ID != FALSE) $__RESULT['data']   =   \IO\HTTP2::handle();
 
-		];
-		//{{{"V0001"},{"order1"},{"","",""}},{{"V0016"},{"order2"},{"order3","targetnum","18618610010"}}}
-		//var_dump($service);
-		\CORE\Rpc::add_client(RPC_TEST_PHPRPC_URI, NULL, 'PHPRpc');
-		//$_result = \CORE\Rpc::call()->RegisterAccount('17090440005','FFFFFFFFFFFFFFFFFFF', 'FFFFFFFFFFFFFFFFFFFF', 'postpaid', $service, '史景烨', '北京', '010', '130xxxxxxxxxx');
-
-		$_result = \CORE\Rpc::call()->getServiceByUser('5');
-		var_dump($_result);
 		return FALSE;
 	}
 

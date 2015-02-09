@@ -43,11 +43,11 @@ class DataModel {
             switch($_data_type) {
                 case ADS_TYPE_HTML:
                     if (isset($_conf['data']['node']))
-                        $__RESULT['data']=   self::parse_html_data($_raw_data['body'], $_conf);
+                        $__RESULT['data']=   self::parse_html_data($_raw_data['data']['body'], $_conf);
                     break;
 
                 case ADS_TYPE_JSON:
-                    $__RESULT['data']   =   json_decode($_raw_data['body'], TRUE);
+                    $__RESULT['data']   =   json_decode($_raw_data['data']['body'], TRUE);
                     break;
 
 
@@ -69,13 +69,13 @@ class DataModel {
                                                                     'CALLBACK'      =>  isset($_request['ads_parameters']['callback'])
                                                                                         ?
                                                                                         $_request['ads_parameters']['callback'] : NULL,
-                                                                    'HEADER'        =>  []
+                                                                    'HEADER'        =>  [
+                                                                                            'Request-Id'    =>  $_request['id'],
+                                                                                            'Content-Type'  =>  $_request['content-type'],
+                                                                                        ]
                                                                 ];
 
-        $__RESULT['HEADER']                                 =   [
-                                                                    'Request-Id'    =>  $_request['id'],
-                                                                    'Content-Type'  =>  $__RESULT['CONTENT-TYPE'],
-                            ];
+        $__RESULT['DATA']['request']                        =   $_response_data['request'];
 
         switch($_conf['role']['request']['scheme']) {
 
@@ -83,45 +83,14 @@ class DataModel {
 
                 if (!isset($_response_data['raw-data']['data']['header']['set-cookie'])) break;
 
-                $_header_set = 1;
-                if (isset($_conf['role']['data']['header']) and !empty($_conf['role']['data']['header'])) {
-                    (strpos($_conf['role']['data']['header'], ADS_FIELD_DATA)   === FALSE) ?    $_header_set -= 1 : NULL;
-                    (strpos($_conf['role']['data']['header'], ADS_FIELD_HEADER) !== FALSE) ?    $_header_set += 2 : NULL;
-                    (strpos($_conf['role']['data']['header'], ADS_FIELD_RAW)    !== FALSE) ?    $_header_set += 4 : NULL;
-                }
+                $__tmp_cookie                               =   self::parse_cookie_data(
+                                                                                            $_response_data['raw-data']['data']['header']['set-cookie'],
+                                                                                            isset($_conf['role']['data']['header']) ? $_conf['role']['data']['header'] : NULL,
+                                                                                            $_response_data['request']['uri']['host']
+                                                                                        );
 
-                $_tmp_cookie                                =   [];
-
-                foreach ($_response_data['raw-data']['data']['header']['set-cookie'] as $_cookie_node)
-                    $_tmp_cookie[]                          =   (new \http\Cookie($_cookie_node))->toArray();
-
-                if ($_header_set & 1) {
-                    $__RESULT['DATA']['cookie']             =   $_tmp_cookie;
-                }
-
-                if ($_header_set & 2) {
-                    $_raw_cookie                            =   str_split(
-                                                                            encrypt(
-                                                                                ENCRYPT_BASE64,
-                                                                                \msgpack_pack($__RESULT['DATA']['cookie'])
-                                                                            ),
-                                                                            4 * 4096
-                                                                        );
-
-                    $__RESULT['HEADER']['Set-Cookie']       =   [];
-
-                    foreach($_raw_cookie as $_key => $_cookie_node) {
-                        $__RESULT['HEADER']['Set-Cookie'][] =   (new \http\Cookie())
-                                                                    ->setCookie('ADS-PROXY-'.$_key, $_cookie_node)
-                                                                        ->toArray();
-                    }
-
-                }
-
-                if ($_header_set & 4) {
-                    !isset($__RESULT['HEADER']['Set-Cookie']) ? $__RESULT['HEADER']['Set-Cookie']   = [] : NULL;
-                    $__RESULT['HEADER']['Set-Cookie']       =   array_merge($__RESULT['HEADER']['Set-Cookie'], $_tmp_cookie);
-                }
+                $__tmp_cookie['DATA']   != NULL ? $__RESULT['DATA']['cookie']       =   $__tmp_cookie['DATA']   : FALSE;
+                $__tmp_cookie['HEADER'] != NULL ? $__RESULT['HEADER']['Set-Cookie'] =   $__tmp_cookie['HEADER'] : FALSE;
 
                 break;
 
@@ -150,6 +119,60 @@ class DataModel {
             }
         }
 
+
+        return $__RESULT;
+    }
+
+    private static function parse_cookie_data($_raw_cookies, $_scope = NULL, $_default_host) {
+
+        $_header_set                                =   1;
+        $_tmp_cookie                                =   [];
+        $__RESULT                                   =   [
+                                                            'DATA'      =>  NULL,
+                                                            'HEADER'    =>  []
+                                                        ];
+
+        if (
+            $_scope != NULL
+            or
+            !empty($_scope)
+        ) {
+            (strpos($_scope, ADS_FIELD_DATA)   === FALSE) ?     $_header_set -= 1 : NULL;
+            (strpos($_scope, ADS_FIELD_HEADER) !== FALSE) ?     $_header_set += 2 : NULL;
+            (strpos($_scope, ADS_FIELD_RAW)    !== FALSE) ?     $_header_set += 4 : NULL;
+        }
+
+        foreach ($_raw_cookies as $_cookie_node) {
+            $_tmp_node                              =   new \http\Cookie($_cookie_node);
+            $_tmp_node->getDomain() === NULL ? $_tmp_node->setDomain($_default_host) : FALSE;
+            $_tmp_cookie[]                          =   $_tmp_node->toArray();
+        }
+
+        if ($_header_set & 1) {
+            $__RESULT['DATA']                       =   $_tmp_cookie;
+        }
+
+        if ($_header_set & 2) {
+            $_raw_cookie                            =   str_split(
+                encrypt(
+                    ENCRYPT_BASE64,
+                    \msgpack_pack($__RESULT['DATA'])
+                ),
+                4 * 4096
+            );
+
+            foreach($_raw_cookie as $_key => $_cookie_node) {
+                $__RESULT['HEADER'][]               =   (new \http\Cookie())
+                                                            ->setCookie('ADS-PROXY-'.$_key, $_cookie_node)
+                                                            ->toArray();
+            }
+
+        }
+
+        if ($_header_set & 4) {
+            !isset($__RESULT['HEADER']) ? $__RESULT['HEADER']   = [] : NULL;
+            $__RESULT['HEADER']       =   array_merge($__RESULT['HEADER'], $_tmp_cookie);
+        }
 
         return $__RESULT;
     }

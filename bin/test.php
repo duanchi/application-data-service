@@ -36,6 +36,8 @@ $_str = "%u806A%u660E%u7684%u4F60%u4E00%u5B9A%u77E5%u9053%u83B7%u53D6%u4E4B%u540
 header('spent:' . Timespent::spent());
 
 
+var_dump(\http\Client\Curl\HTTP_VERSION_2_0);
+
 //var_dump(microtime());
 
 function unescape($str)

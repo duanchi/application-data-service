@@ -30,8 +30,8 @@ class RawDataModel {
                                             'header'            =>  []
                                         ];
 
-        $__RESULT['uri']            =   $_conf['role']['request']['uri'];
-        $__RESULT['host']           =   self::parse_host($_request['uri'], $_conf['etc']['hosts']);
+        $__RESULT['uri']            =   $_request['request-uri'];
+        $__RESULT['host']           =   self::parse_host($_request['request-uri']['raw'], $_conf['etc']['hosts']);
         $__RESULT['port']           =   isset($__RESULT['request']['uri']['port']) ? $__RESULT['request']['uri']['port'] : 80;
         $__RESULT['method']           =   $_request['method'];
         $__RESULT['request']        =   $_request['request'];
@@ -61,11 +61,11 @@ class RawDataModel {
 
                 //SWOOLEING
 
-                $__REQUEST_ID=  \IO\HTTP::add_request(  [
-                                            'uri'       =>  $_parameters['uri']['raw'],
-                                            'method'    =>  $_parameters['method'],
-                                            'host'      =>  $_parameters['host']
-                                        ]);
+                $__REQUEST_ID       =  \IO\HTTP2::add_request(  [
+                                                                    'uri'       =>  $_parameters['uri']['raw'],
+                                                                    'method'    =>  $_parameters['method'],
+                                                                    'host'      =>  $_parameters['host']
+                                                                ]);
 
                 \Devel\Timespent::record('PRE-PROC');
                 if ($__REQUEST_ID != FALSE) $__RESULT['data']   =   \IO\HTTP::handle()[$__REQUEST_ID];
