@@ -30,7 +30,7 @@ class ResponsePlugin extends \Yaf\Plugin_Abstract {
                     break;
 
                 case TYPE_JSON:
-                    $_ECHO = json_encode($__RESPONSE['DATA'], JSON_PRETTY_PRINT + JSON_UNESCAPED_UNICODE);
+                    $_ECHO = json_encode($__RESPONSE['DATA']);
                     break;
 
                 default:

@@ -66,9 +66,29 @@ class TestController extends Yaf\Controller_Abstract {
 
 
 		\Devel\Timespent::record('PRE-PROC');
-		if ($__REQUEST != FALSE) $__RESULT['data']   =   \IO\HTTP2::handle();
+		//if ($__REQUEST != FALSE) $__RESULT['data']   =   \IO\HTTP2::handle();
 
-		t($__RESULT);
+		$_node = 'table tr:eq(1):first td:btw(1,5):gt(2)';
+
+		$tmp_node						= 	explode(':',str_replace(')',':',$_node));
+		//preg_match_all('/(.+?)(:(eq|lt|gt|btw|first|last)\((\d+|\d+,\d+)\))*\S*/', 'table tr:eq(1):btw(1,5)', $_matches, PREG_SET_ORDER);
+		//t($_matches);
+
+
+		t($tmp_node);
+
+		while(list($_key, $_node) = each($tmp_node)) {
+
+			if (empty($_node) or $_node == '') ;
+
+			elseif (strpos($_node, '(') === FALSE) {
+				//execute normal
+			} else {
+				list($_option, $_parameter) = explode('(', $_node);
+				t($_option,$_parameter);
+			}
+
+		}
 
 		return FALSE;
 	}

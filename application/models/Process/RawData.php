@@ -68,7 +68,7 @@ class RawDataModel {
                                                                 ]);
 
                 \Devel\Timespent::record('PRE-PROC');
-                if ($__REQUEST_ID != FALSE) $__RESULT['data']   =   \IO\HTTP::handle()[$__REQUEST_ID];
+                if ($__REQUEST_ID != FALSE) $__RESULT   =   \IO\HTTP2::handle()[$__REQUEST_ID];
 
 
                 break;

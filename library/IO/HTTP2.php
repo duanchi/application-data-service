@@ -16,14 +16,15 @@ class HTTP2 {
     public  static function add_request($_options = []) {
 
         $_http_option                       =   [
-                                                    'method'        =>  HTTP_GET,
-                                                    'version'       =>  HTTP_VERSION_1_1,
-                                                    'timeout'       =>  10,
-                                                    'request-data'  =>  NULL,
-                                                    'host'          =>  '',
-                                                    'uri'           =>  '',
-                                                    'headers'       =>  [],
-                                                    'keepalive'     =>  TRUE
+                                                    'method'            =>  HTTP_GET,
+                                                    'version'           =>  HTTP_VERSION_1_1,
+                                                    'timeout'           =>  30,
+                                                    'connect-timeout'   =>  10,
+                                                    'request-data'      =>  NULL,
+                                                    'host'              =>  '',
+                                                    'uri'               =>  '',
+                                                    'headers'           =>  [],
+                                                    'keepalive'         =>  TRUE
                                                 ];
         $__RESULT                           =   make_uuid($_http_option['method']);
         $_request_handle                    =   NULL;
@@ -67,6 +68,7 @@ class HTTP2 {
 ;        $_request_handle->setOptions([
                                         'protocol'      =>  $_http_option['version'],
                                         'timeout'       =>  $_http_option['timeout'],
+                                        'connecttimeout'=>  $_http_option['connect-timeout'],
                                         'tcp_keepalive' =>  $_http_option['keepalive']
                                     ]);
 
