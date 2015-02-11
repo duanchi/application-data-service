@@ -128,12 +128,36 @@ class DataModel {
     private static function parse_data_node($_data_handle, $_node) {
 
         $__RESULT                       =   FALSE;
-        $_tmp_data                      =   NULL;
+        $_data_handle                   =   [$_data_handle];
 
+        $tmp_node						= 	explode(
+                                                        ':',
+                                                        str_replace(
+                                                                        ')',
+                                                                        ':',
+                                                                        $_node
+                                                        )
+                                                    );
 
-        $tmp_node                       =   str_replace(')',':',$_node);
+        while(list($_key, $_node) = each($tmp_node)) {
 
-        if (preg_match_all('/(.+?):(eq|lt|gt|btw|first|last)(\(\d+\))?\S*/', $_node, $_matches, PREG_SET_ORDER) && $_matches) {
+            $_tmp_data_handle           =   [];
+
+            if (empty($_node) or $_node == '') ;
+
+            elseif (strpos($_node, '(') === FALSE) {
+                foreach($_data_handle as $_data_node) {
+                    $_tmp_data_handle   =   array_merge($_tmp_data_handle, $_data_handle->find($_node));
+                }
+            } else {
+                list($_option, $_parameter) = explode('(', $_node);
+                t($_option,$_parameter);
+            }
+
+            $_data_handle               =   $_tmp_data_handle;
+        }
+
+        /*if (preg_match_all('(.+?):(eq|lt|gt|btw|first|last)(\(\d+\))?\S*', $_node, $_matches, PREG_SET_ORDER) && $_matches) {
             t($_matches);
 
         } else {
@@ -146,7 +170,7 @@ class DataModel {
                                                 'value'   =>  $_data->getPlainText(),
                                                 'attribute' =>  $_data->getAttr(),
                                             ];
-        }
+        }*/
 
         return $__RESULT;
     }

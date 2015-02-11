@@ -70,27 +70,70 @@ class TestController extends Yaf\Controller_Abstract {
 
 		$_node = 'table tr:eq(1):first td:btw(1,5):gt(2)';
 
-		$tmp_node						= 	explode(':',str_replace(')',':',$_node));
+		$_node_stack						= 	explode(' ', str_replace(')', '', $_node));
 		//preg_match_all('/(.+?)(:(eq|lt|gt|btw|first|last)\((\d+|\d+,\d+)\))*\S*/', 'table tr:eq(1):btw(1,5)', $_matches, PREG_SET_ORDER);
 		//t($_matches);
 
 
-		t($tmp_node);
+		t($_node_stack);
+		$_find_expression				=	'';
+		do {
+			$_node = explode(':', current($_node_stack));
 
-		while(list($_key, $_node) = each($tmp_node)) {
+			$_find_expression		.=	' ' . array_shift($_node);
+			t($_find_expression);
+			if (!empty($_node)) {
+				//execute normal handle
+				$_data_handle			=	[];
+				$_data_handle			=	$this->parse_senior_selection_node($_data_handle, $_node);
+				$_find_expression		=	'';
 
-			if (empty($_node) or $_node == '') ;
 
-			elseif (strpos($_node, '(') === FALSE) {
-				//execute normal
-			} else {
-				list($_option, $_parameter) = explode('(', $_node);
-				t($_option,$_parameter);
 			}
 
-		}
+		} while(next($_node_stack));
 
 		return FALSE;
+	}
+
+	private function parse_senior_selection_node($_data_handle, $_node) {
+
+		$_result			=	$_data_handle;
+		$_node_length 		= 	count($_result);
+
+		foreach ($_node as $_key => $_node_x) {
+			$_result		=	$this->parse_matched_option($_result, explode('(', strtolower($_node_x)), $_node_length);
+		}
+
+		return $_result;
+	}
+
+	private function parse_matched_option($_data_handle, array $_node, $_node_length) {
+		switch($_node[0]) {
+			case 'gt':
+
+				break;
+
+			case 'lt':
+
+				break;
+
+			case 'between':
+
+				break;
+
+			case 'first':
+
+				break;
+
+			case 'last':
+
+				break;
+
+			case 'eq':
+
+				break;
+		}
 	}
 
 	public function etcAction() {
