@@ -109,31 +109,43 @@ class TestController extends Yaf\Controller_Abstract {
 	}
 
 	private function parse_matched_option($_data_handle, array $_node, $_node_length) {
+		
+		$_result			=	[];
+
 		switch($_node[0]) {
 			case 'gt':
-
+				if ($_node_length < $_node[1]) break;
+				$_result	=	array_slice($_data_handle, $_node[1], $_node_length - $_node[1]);
 				break;
 
 			case 'lt':
-
+				if ($_node_length < $_node[1]) break;
+				$_result	=	array_slice($_data_handle, 0, $_node[1]);
 				break;
 
 			case 'between':
-
+				$_node[1]	=	explode(',', $_node[1]);
+				if (!isset($_node[1][1]) or $_node_length < $_node[1][1]) break;
+				$_result	=	array_slice($_data_handle, $_node[1][0], $_node_length - $_node[1][1]);
 				break;
 
 			case 'first':
-
+				if ($_node_length < $_node[1]) break;
+				$_result[]	=	$_data_handle[0];
 				break;
 
 			case 'last':
-
+				if ($_node_length < $_node[1]) break;
+				$_result[]	=	array_pop($_data_handle);
 				break;
 
 			case 'eq':
-
+				if ($_node_length < $_node[1]) break;
+				$_result[]	=	$_data_handle[$_node[1]];
 				break;
 		}
+
+		return $_result;
 	}
 
 	public function etcAction() {
