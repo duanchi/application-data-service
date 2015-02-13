@@ -128,34 +128,7 @@ class DataModel {
     private static function parse_data_node($_data_handle, $_node) {
 
         $__RESULT                       =   FALSE;
-        $_data_handle                   =   [$_data_handle];
-
-        $tmp_node						= 	explode(
-                                                        ':',
-                                                        str_replace(
-                                                                        ')',
-                                                                        ':',
-                                                                        $_node
-                                                        )
-                                                    );
-
-        while(list($_key, $_node) = each($tmp_node)) {
-
-            $_tmp_data_handle           =   [];
-
-            if (empty($_node) or $_node == '') ;
-
-            elseif (strpos($_node, '(') === FALSE) {
-                foreach($_data_handle as $_data_node) {
-                    $_tmp_data_handle   =   array_merge($_tmp_data_handle, $_data_handle->find($_node));
-                }
-            } else {
-                list($_option, $_parameter) = explode('(', $_node);
-                t($_option,$_parameter);
-            }
-
-            $_data_handle               =   $_tmp_data_handle;
-        }
+        $_tmp_data                      =   [$_data_handle];
 
         /*if (preg_match_all('(.+?):(eq|lt|gt|btw|first|last)(\(\d+\))?\S*', $_node, $_matches, PREG_SET_ORDER) && $_matches) {
             t($_matches);
@@ -171,8 +144,118 @@ class DataModel {
                                                 'attribute' =>  $_data->getAttr(),
                                             ];
         }*/
+        \Devel\Timespent::record('GET-NODE1');
+        $_node_stack					= 	explode(' ', str_replace(')', '', $_node));
+        //preg_match_all('/(.+?)(:(eq|lt|gt|btw|first|last)\((\d+|\d+,\d+)\))*\S*/', 'table tr:eq(1):btw(1,5)', $_matches, PREG_SET_ORDER);
+        //t($_matches);
+
+        $_find_expression				=	'';
+        do {
+            $_node = explode(':', current($_node_stack));
+            $_find_expression		   .=	' ' . array_shift($_node);
+
+            if (!empty($_node)) {
+                $_tmp_data			    =	self::parse_senior_selection_node($_tmp_data, $_find_expression, $_node);
+                $_find_expression		=	'';
+            }
+
+        } while(next($_node_stack));
+
+        if (!empty($_find_expression))
+            $_tmp_data                  =   self::parse_normal_selection_node($_tmp_data, $_find_expression);
+
+        \Devel\Timespent::record('GET-NODE2');
+        if (!empty($_tmp_data)) foreach ($_tmp_data as $_data) {
+            $__RESULT[]                 =   [
+                'value'   =>  $_data->getPlainText(),
+                'attribute' =>  $_data->getAttr(),
+            ];
+        }
 
         return $__RESULT;
+    }
+
+    private static function parse_normal_selection_node($_data_handle, $_node) {
+
+        $_result                        =   [];
+
+        foreach ($_data_handle as $_current_data_node) {
+            $_tmp_result                =   $_current_data_node->find($_node);
+            $_tmp_result != NULL
+            ? $_result                  =   array_merge($_result, $_tmp_result) : FALSE;
+        }
+
+        return  $_result;
+    }
+
+    private static function parse_senior_selection_node($_data_handle, $_find_expression, array $_node) {
+
+        $_result			            =	[];
+        $_node_length                   =   0;
+        $_node_start                    =   0;
+        $_node_end                      =   FALSE;
+
+        do {
+            $_node_x                    =   explode('(', current($_node));
+
+            if ($_node_x[0] == 'first'  ) {
+                $_node_start            =   0;
+                break;
+            }
+
+            if ($_node_x[0] == 'last'   ) {
+                $_node_start            =   -1;
+                break;
+            }
+
+            if ($_node_x[0] == 'eq'     ) {
+                $_node_start            =   $_node_x[1];
+                break;
+            }
+
+            if ($_node_x[0] == 'lt'     ) {
+                $_node_start            =   0;
+                $_node_end              =   $_node_x[1];
+                break;
+            }
+            if ($_node_x[0] == 'gt'     ) {
+                $_node_start            =   $_node_x[1];
+                $_node_end              =   -1;
+                break;
+            }
+
+            if ($_node_x[0] == 'btw'    ){
+                $_node_x[1]             =   explode(',', $_node_x[1]);
+                $_node_start            =   $_node_x[1][0] -1;
+                $_node_end              =   $_node_x[1][1];
+                break;
+            }
+
+        } while (next($_node));
+
+        foreach ($_data_handle as $_current_data_handle) {
+
+            $_tmp_result                =   [];
+
+            if ($_node_end === FALSE) {
+                $_tmp_result            =   $_current_data_handle->find($_find_expression, $_node_start);
+            } else {
+                $_tmp_result            =   $_current_data_handle->find($_find_expression);
+                $_node_length           =   count($_result);
+                $_tmp_result	        =	array_slice(
+                                                            $_result,
+                                                            $_node_start -1,
+                                                            $_node_end > 0
+                                                                ? $_node_end - $_node_start + 1
+                                                                : $_node_length + $_node_end - $_node_start
+                                                        );
+            }
+
+            $_tmp_result != NULL
+                ? $_result              =   array_merge($_result, $_tmp_result) : FALSE;
+        }
+
+        return $_result;
     }
 
     private static function parse_cookie_data($_raw_cookies, $_scope = NULL, $_default_host) {
