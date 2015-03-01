@@ -14,19 +14,34 @@ const ENCRYPT_BASE64    =   4;
 
 function encrypt($_method = ENCRYPT_MD5, $_string, $_key = NULL) {
 
-    $__RESULT           =   FALSE;
+    $_result            =   FALSE;
 
     switch($_method) {
 
         case ENCRYPT_BASE64:
-            $__RESULT   =   base64_encode($_string);
+            $_result    =   base64_encode($_string);
             break;
 
         case ENCRYPT_MD5:
         default:
-            $__RESULT   =   md5($_string);
+            $_result    =   md5($_string);
             break;
     }
 
-    return $__RESULT;
+    return $_result;
+}
+
+function decrypt($_method = ENCRYPT_BASE64, $_string, $_key = NULL) {
+
+    $_result            =   FALSE;
+
+    switch($_method) {
+
+        case ENCRYPT_BASE64:
+        default:
+            $_result    =   base64_decode($_string);
+            break;
+    }
+
+    return $_result;
 }

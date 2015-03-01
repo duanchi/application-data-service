@@ -84,6 +84,25 @@ class RequestModel {
         }
 
 
+        //COOKIE
+
+        $_tmp_cookie                =   $_COOKIE;
+        $_ads_cookie                =   '';
+        foreach ($_tmp_cookie as $_key => $_cookie_node) {
+            if (strpos($_key, 'ADS-') === 0) {
+                $_ads_cookie       .=   $_cookie_node;
+                unset($_tmp_cookie[$_key]);
+            }
+        }
+
+        if (!empty($_ads_cookie))
+            array_merge(
+                            $_tmp_cookie,
+                            \IO\HTTP2\Cookie::deserialize($_ads_cookie)
+                        );
+
+
+
         //MAKE URL REQUEST RESULT
         $__RESULT['method']         =   constant('HTTP_'.$_http_method);
         $__RESULT['uri']            =   $_tmp_request_uri[0];

@@ -10,6 +10,8 @@
  */
 
 namespace Process;
+use IO\HTTP2\Cookie;
+
 /**
  * Class Authorize
  * @package Process
@@ -288,17 +290,11 @@ class DataModel {
         }
 
         if ($_header_set & 2) {
-            $_raw_cookie                            =   str_split(
-                encrypt(
-                    ENCRYPT_BASE64,
-                    \msgpack_pack($__RESULT['DATA'])
-                ),
-                4 * 4096
-            );
+            $_raw_cookie                            =   str_split(Cookie::deserialize($__RESULT['DATA']));
 
             foreach($_raw_cookie as $_key => $_cookie_node) {
                 $__RESULT['HEADER'][]               =   (new \http\Cookie())
-                                                            ->setCookie('ADS-PROXY-'.$_key, $_cookie_node)
+                                                            ->setCookie('ADS-'.$_key, $_cookie_node)
                                                             ->toArray();
             }
 
