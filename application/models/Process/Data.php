@@ -60,10 +60,22 @@ class DataModel {
 
                     break;
 
+                case ADS_TYPE_MSGPACK:
+                    $__RESULT['data']                   =   msgpack_unpack($__RESULT['raw-data']['body'], TRUE);
+                    break;
+
+                case ADS_TYPE_JSONP:
+
+                    break;
+
+                case ADS_TYPE_XML:
+
+                    break;
 
                 case ADS_TYPE_STREAM:
+                case ADS_TYPE_PLAIN_TEXT:
                 default:
-
+                    $__RESULT['data']                   =   $__RESULT['raw-data']['body'];
                     break;
             }
         }
