@@ -38,6 +38,49 @@ class TestController extends Yaf\Controller_Abstract {
 		return FALSE;
 	}
 
+    public function sms() {
+        $array_1    =   parse_ini_file(APPLICATION_PATH . '/tmp/1.txt');
+
+        $_ntf_array =   [];
+        $_tmp_arr   =   [];
+        foreach ($array_1 as $arr) {
+            $_tmp_arr = explode(',', iconv('GB2312', 'UTF-8', $arr));
+
+            $_ntf_array[$_tmp_arr[0]][$_tmp_arr[1]] =   $_tmp_arr[2];
+        }
+
+        $array_2    =   parse_ini_file(APPLICATION_PATH . '/tmp/2.txt');
+        $_sms_array =   [];
+
+        foreach ($array_2 as $key => $arr) {
+            $_tmp_arr   = explode(',', $arr);
+            $key        =   iconv('GBK', 'UTF-8', $key);
+
+            $_sms_array[$key]     =   $_tmp_arr;
+        }
+
+        $_sum_array =   [];
+
+        foreach ($_sms_array as $key => $arr) {
+            $_sum_array[$key]   =   [];
+
+            foreach ($arr as $sub_key => $sub_arr) {
+                $_sum_array[$key][$sub_key] =   ($sub_arr + $_ntf_array[$key][$sub_key]) * 3;
+            }
+        }
+
+
+
+
+        //----------------------------
+        file_put_contents(APPLICATION_PATH . '/tmp/out_mt.csv',iconv('UTF-8', 'GB2312', "2015-01-01,00点,01点,02点,03点,04点,05点,06点,07点,08点,08点,10点,11点,12点,13点,14点,15点,16点,17点,18点,19点,20点,21点,22点,23点\r\n"), FILE_APPEND);
+
+        foreach ($_sum_array as $key => $arr) {
+            file_put_contents(APPLICATION_PATH . '/tmp/out_mt.csv', iconv('UTF-8', 'GB2312', $key) . ',' . implode(',', $arr) . "\r\n", FILE_APPEND);
+        }
+        return FALSE;
+    }
+
 	public function rpcAction() {
 		\CORE\Rpc::add_server(new TestServer(), NULL, 'Yar');
 		\CORE\Rpc::handle();
