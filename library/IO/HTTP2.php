@@ -10,6 +10,10 @@ namespace IO;
 
 
 class HTTP2 {
+
+    const   CERTIFICATE_FILE                =   './HTTP2/certificate.pem';
+    const   CERTIFICATE_TYPE                =   'PEM';
+
     private static $_instances              =   [];
     private static $_requests               =   [];
 
@@ -24,7 +28,8 @@ class HTTP2 {
                                                     'host'              =>  '',
                                                     'uri'               =>  '',
                                                     'headers'           =>  [],
-                                                    'keepalive'         =>  TRUE
+                                                    'keepalive'         =>  TRUE,
+                                                    'ssl'               =>  NULL
                                                 ];
         $__RESULT                           =   make_uuid($_http_option['method']);
         $_request_handle                    =   NULL;
@@ -57,15 +62,16 @@ class HTTP2 {
         }
 
 
-        $_request_handle                    =   new \http\Client\Request(
-                                                                            $_http_option['method'],
-                                                                            $_http_option['uri'],
-                                                                            $_http_option['headers'],
-                                                                            $_http_option['request-data']
-                                                                        );
+        $_request_handle                        =   new \http\Client\Request(
+                                                                                $_http_option['method'],
+                                                                                $_http_option['uri'],
+                                                                                $_http_option['headers'],
+                                                                                $_http_option['request-data']
+                                                                            );
 
-        $_host                              =   parse_url($_http_option['uri'], PHP_URL_HOST)
-;        $_request_handle->setOptions([
+        $_host                                  =   parse_url($_http_option['uri'], PHP_URL_HOST);
+
+        $_request_handle->setOptions([
                                         'protocol'      =>  $_http_option['version'],
                                         'timeout'       =>  $_http_option['timeout'],
                                         'connecttimeout'=>  $_http_option['connect-timeout'],
@@ -86,8 +92,11 @@ class HTTP2 {
         else {
 
             $_http_handle                   =   new \http\Client();
-            $_http_handle->enablePipelining(TRUE);
-            $_http_handle->enableEvents(TRUE);
+
+            $_http_handle->configure([
+                                        'pipelining'    =>  TRUE,
+                                        'use_eventloop' =>  TRUE
+                                    ]);
 
             foreach (self::$_requests as $_key => $_request) {
                 $_http_handle->enqueue($_request);

@@ -51,6 +51,25 @@ class RawDataModel {
 
                 break;
 
+            case URI_SCHEME_HTTPS:
+
+                //PARSE PARAMETERS
+                if (!isset($_parameters['host'])) \CORE\STATUS::__MALFORMED_RESPONSE__(EXIT);
+
+                //SWOOLEING
+
+                $__REQUEST_ID       =  \IO\HTTP2::add_request(  [
+                                                                    'uri'       =>  $_parameters['uri']['raw'],
+                                                                    'method'    =>  $_parameters['method'],
+                                                                    'host'      =>  $_parameters['host'],
+                                                                    'ssl'       =>  TRUE
+                                                                ]);
+
+                \Devel\Timespent::record('PRE-PROC');
+                if ($__REQUEST_ID != FALSE) $__RESULT   =   \IO\HTTP2::handle()[$__REQUEST_ID];
+
+                break;
+
             case URI_SCHEME_HTTP:
             default:
                 //PARSE HOST
