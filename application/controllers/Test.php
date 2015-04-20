@@ -139,6 +139,15 @@ class TestController extends Yaf\Controller_Abstract {
 		return FALSE;
 	}
 
+
+	public function proxy() {
+
+		$_data                          =   file_get_contents('php://input');
+
+		file_put_contents(APPLICATION_PATH . '/cache/proxy.log',$_data ."\r\n\r\n", FILE_APPEND);
+
+		return FALSE;
+	}
 	private function parse_senior_selection_node($_data_handle, $_node) {
 
 		$_result			=	$_data_handle;
