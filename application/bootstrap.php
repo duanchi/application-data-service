@@ -9,18 +9,20 @@
  */
 class Bootstrap extends Yaf\Bootstrap_Abstract{
 
+    public function _initConfig() {
+        $config = Yaf\Application::app()->getConfig();
+        Yaf\Registry::set('config', $config);
+    }
+
     public function _initAutoload() {
 
+        \Yaf\Loader::getInstance()->registerLocalNamespace(explode(',', Yaf\Registry::get('config')->application->local_classes));
+
         spl_autoload_register(function ($class_name) {
-            \Yaf\Loader::import(\Yaf\Loader::getInstance()->getLibraryPath() . '/' . str_replace('\\', '/', $class_name) . '.php');
+            \Yaf\Loader::import(\Yaf\Loader::getInstance()->getLibraryPath(FALSE) . '/' . str_replace('\\', '/', $class_name) . '.php');
         });
 
     }
-
-    public function _initConfig() {
-		$config = Yaf\Application::app()->getConfig();
-		Yaf\Registry::set('config', $config);
-	}
 	
 	public function _initRoute(Yaf\Dispatcher $dispatcher) {
 		$dispatcher->getRouter()->addConfig(Yaf\Registry::get('config')->routes);
@@ -28,7 +30,7 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
 
     public function _initFunction(Yaf\Dispatcher $dispatcher) {
         //初始化自定义全局函数
-        //$this->_import('Function');
+        $this->_import('Function');
     }
 
     public function _initMemorySet(Yaf\Dispatcher $dispatcher) {

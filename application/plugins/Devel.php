@@ -7,7 +7,7 @@ class DevelPlugin extends Yaf\Plugin_Abstract {
 	private $_runtime;
 	
 	function __construct() {
-		//\Devel\Timespent::_init();
+		\Devel\Timespent::_init();
 	}
 	public function routerStartup(Yaf\Request_Abstract $request, Yaf\Response_Abstract $response) {
 

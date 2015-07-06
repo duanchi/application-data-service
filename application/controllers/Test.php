@@ -33,6 +33,7 @@ class TestController extends Yaf\Controller_Abstract {
 	}
 
 	public function env() {
+		new \Api\Api();
 		phpinfo();
 
 		return FALSE;
