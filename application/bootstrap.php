@@ -9,6 +9,14 @@
  */
 class Bootstrap extends Yaf\Bootstrap_Abstract{
 
+    public function _initAutoload() {
+
+        spl_autoload_register(function ($class_name) {
+            \Yaf\Loader::import(\Yaf\Loader::getInstance()->getLibraryPath() . '/' . str_replace('\\', '/', $class_name) . '.php');
+        });
+
+    }
+
     public function _initConfig() {
 		$config = Yaf\Application::app()->getConfig();
 		Yaf\Registry::set('config', $config);
@@ -20,7 +28,7 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
 
     public function _initFunction(Yaf\Dispatcher $dispatcher) {
         //初始化自定义全局函数
-        $this->_import('Function');
+        //$this->_import('Function');
     }
 
     public function _initMemorySet(Yaf\Dispatcher $dispatcher) {
@@ -63,8 +71,26 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
 	 * @param	unknown_type $type
 	 */
 	private function _import ($file_path) {
-		$file_path = Yaf\Registry::get('config')->get('application')->library.DIRECTORY_SEPARATOR.$file_path;
-		$file_list = glob($file_path.DIRECTORY_SEPARATOR.'*.php');
-		foreach($file_list as $v) Yaf\Loader::import($v);
+
+        $file_list      =   [];
+
+        $file_path      =   \Yaf\Loader::getInstance()->getLibraryPath(TRUE) . DIRECTORY_SEPARATOR . $file_path;
+
+        if (file_exists($file_path)) {
+            $file_list  =   glob($file_path . DIRECTORY_SEPARATOR . '*.php');
+        }
+
+		$file_path      =   \Yaf\Registry::get('config')->get('application')->library . DIRECTORY_SEPARATOR . $file_path;
+
+        if (file_exists($file_path)) {
+            $file_list  =   array_merge($file_list, glob($file_path . DIRECTORY_SEPARATOR . '*.php'));
+        }
+
+		foreach($file_list as $v) \Yaf\Loader::import($v);
 	}
+
+
+    private function _autoload($class_name) {
+
+    }
 }

@@ -32,7 +32,7 @@ class TestController extends Yaf\Controller_Abstract {
 		return FALSE;
 	}
 
-	public function envAction() {
+	public function env() {
 		phpinfo();
 
 		return FALSE;
