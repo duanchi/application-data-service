@@ -27,7 +27,6 @@ class ConfigModel {
         $_conf_directory                        =   ADS_APPS_CONFIG . DIRECTORY_SEPARATOR . $_app->appkey . DIRECTORY_SEPARATOR;
         $_licence_config                        =   get_yaf_config($_conf_directory . 'licence.ini');
 
-
         if (    isset($_licence_config->licence->key)
                 and
                 $_licence_config->licence->key == $_app->licence
@@ -35,6 +34,7 @@ class ConfigModel {
 
             $_h_conf                            =   get_yaf_config($_conf_directory . 'conf.h.ini');
 
+            
             if (isset($_h_conf->etc->constant))
                 foreach ($_h_conf->etc->constant as $_key => $_constant) define($_key, $_constant);
 

@@ -21,7 +21,7 @@ class RawDataModel {
                                             'uri'   =>  [],
                                             'host'  =>  '',
                                             'port'  =>  80,
-                                            'method'=>  HTTP_GET,
+                                            'method'=>  EX_NET_HTTP_METHOD_GET,
                                             'timeout'   =>  10,
                                             'connect-timeout'   =>  0.5,
                                             'request'      =>  NULL,
@@ -43,7 +43,7 @@ class RawDataModel {
 	
 	public static function fetch_raw_data($_parameters) {
         $__RESULT                   =   FALSE;
-        $__REQUEST_ID               =   FALSE;
+        $__REQUEST                  =   FALSE;
 
         //FETCH URI WITH SCHEME
         switch($_parameters['uri']['scheme']) {
@@ -58,15 +58,25 @@ class RawDataModel {
 
                 //SWOOLEING
 
-                $__REQUEST_ID       =  \IO\HTTP2::add_request(  [
+                $__REQUEST          =   new \Net\Http\Client();
+                $__request_instance =   new \Net\Http\Client\Request(
+                    $_parameters['method'],
+                    $_parameters['uri']['raw'],
+                    [
+                        EX_NET_HTTP_OPT_SSL_VERIFYPEER =>  FALSE
+                    ]
+                );
+                $__REQUEST->add_request($__request_instance);
+
+                /*$__REQUEST_ID       =  \IO\HTTP2::add_request(  [
                                                                     'uri'       =>  $_parameters['uri']['raw'],
                                                                     'method'    =>  $_parameters['method'],
                                                                     'host'      =>  $_parameters['host'],
                                                                     'ssl'       =>  TRUE
-                                                                ]);
+                                                                ]);*/
 
                 \Devel\Timespent::record('PRE-PROC');
-                if ($__REQUEST_ID != FALSE) $__RESULT   =   \IO\HTTP2::handle()[$__REQUEST_ID];
+                if ($__REQUEST != FALSE) $__RESULT   =   $__REQUEST->execute();
 
                 break;
 
@@ -80,14 +90,15 @@ class RawDataModel {
 
                 //SWOOLEING
 
-                $__REQUEST_ID       =  \IO\HTTP2::add_request(  [
-                                                                    'uri'       =>  $_parameters['uri']['raw'],
-                                                                    'method'    =>  $_parameters['method'],
-                                                                    'host'      =>  $_parameters['host']
-                                                                ]);
+                $__REQUEST          =   new \Net\Http\Client();
+                $__request_instance =   new \Net\Http\Client\Request(
+                    $_parameters['method'],
+                    $_parameters['uri']['raw']
+                );
+                $__REQUEST->add_request($__request_instance);
 
                 \Devel\Timespent::record('PRE-PROC');
-                if ($__REQUEST_ID != FALSE) $__RESULT   =   \IO\HTTP2::handle()[$__REQUEST_ID];
+                if ($__REQUEST != FALSE) $__RESULT   =   $__REQUEST->execute();
 
 
                 break;

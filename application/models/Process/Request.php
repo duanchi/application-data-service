@@ -27,7 +27,7 @@ class RequestModel {
 
         $__RESULT                   =   [
                                             'id'            =>  make_uuid('REQUEST'),
-                                            'method'        =>  HTTP_GET,
+                                            'method'        =>  EX_NET_HTTP_METHOD_GET,
                                             'uri'           =>  NULL,
                                             'key'           =>  NULL,
                                             'uri-scheme'    =>  URI_SCHEME_HTTP,
@@ -37,7 +37,7 @@ class RequestModel {
                                             'header'        =>  [],
 
 
-                                            'version'       =>  REQUEST_VERSION_NULL,
+                                            'version'       =>  EX_NET_HTTP_VERSION_1_1,
                                             'ranges'        =>  [
                                                                     'columns'       => NULL,
                                                                     'order'         => NULL,
