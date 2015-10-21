@@ -15,10 +15,10 @@
  * @see     svn://svn.vop.com/api/manual/Controller/Error
  * @author  duanChi <http://weibo.com/shijingye>
  */
-class ErrorController extends Yaf\Controller_Abstract {
+class IndexController extends Yaf\Controller_Abstract {
 
-	public function errorAction($exception) {
-		t($exception);
+	public function indexAction() {
+
 		return FALSE;
 	}
 }

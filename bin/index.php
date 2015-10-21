@@ -1,5 +1,7 @@
 <?php
-define('APPLICATION_PATH', dirname(dirname(__FILE__)));
-define('PW_PATH', dirname(APPLICATION_PATH));
-$application = new Yaf\Application(APPLICATION_PATH.'/conf/application.ini');
+const APPLICATION_KEY   =   '1445321288';
+$_config                =   [
+	'application'   =>  Yaconf::get(APPLICATION_KEY . '_' . ini_get('yaf.environ') . '_application')
+];
+$application = new Yaf\Application($_config);
 $application->bootstrap()->run();

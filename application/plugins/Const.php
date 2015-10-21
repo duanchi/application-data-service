@@ -12,32 +12,8 @@
 class ConstPlugin extends Yaf\Plugin_Abstract {
 
 	function __construct() {
-
 		//parse app path
-		$_conf = \Yaf\Registry::get('config')->get('application')->constant;
-        foreach ($_conf as $_key => $_value) {
-            define('ADS_' . strtoupper($_key), $_value);
-        }
-
-        //parse constant config
-        $_conf = get_yaf_config(ADS_CONSTANT_SETTINGS);
-
-        foreach ($_conf as $_property => $_value) {
-            define($_property, $_value);
-        }
-
-		//parse status code config
-		//$_conf = get_yaf_config('status_code/message_code_config.ini');
-		//\Yaf\Registry::set('service',$_conf);
-
-		//parse other
-		$_conf = \Yaf\Registry::get('config')->get('application')->get('api');
-		$this->_app_define($_conf);
-
-		unset($_conf);
+		$_const = \CONF::get('const');
+		while (list($__key, $__value) = each($_const)) define('ADS_' . strtoupper($__key), $__value);
 	}
-
-	private function _app_define($_array = []) {
-		foreach ($_array as $k => $v) define('API_'.strtoupper($k), $v);
-	}
-} 
+}

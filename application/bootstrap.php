@@ -10,22 +10,24 @@
 class Bootstrap extends Yaf\Bootstrap_Abstract{
 
     public function _initConfig() {
-        $config = Yaf\Application::app()->getConfig();
-        Yaf\Registry::set('config', $config);
-    }
+
+        \CONF::set_environment(\Yaf\Application::app()->environ(), APPLICATION_KEY);
+        $config = \CONF::get('application');
+		Yaf\Registry::set('config', $config);
+	}
 
     public function _initAutoload() {
 
-        \Yaf\Loader::getInstance()->registerLocalNamespace(explode(',', Yaf\Registry::get('config')->application->local_classes));
+        \Yaf\Loader::getInstance()->registerLocalNamespace(explode(',', \CONF::get('application.local_namespace')));
 
         spl_autoload_register(function ($class_name) {
-            \Yaf\Loader::import(\Yaf\Loader::getInstance()->getLibraryPath(FALSE) . '/' . str_replace('\\', '/', $class_name) . '.php');
+            \Yaf\Loader::import(\Yaf\Loader::getInstance()->getLibraryPath(FALSE) . DIRECTORY_SEPARATOR . str_replace('\\', '/', $class_name) . '.php');
         });
 
     }
-	
+
 	public function _initRoute(Yaf\Dispatcher $dispatcher) {
-		$dispatcher->getRouter()->addConfig(Yaf\Registry::get('config')->routes);
+		$dispatcher->getRouter()->addConfig(\CONF::get('application.routes'));
 	}
 
     public function _initFunction(Yaf\Dispatcher $dispatcher) {
@@ -33,35 +35,32 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
         $this->_import('Function');
     }
 
-    public function _initMemorySet(Yaf\Dispatcher $dispatcher) {
+    public function _initGlobalVariable(Yaf\Dispatcher $dispatcher) {
         //初始化预定于变量
-        Yaf\Registry::set(      '__REQUEST', NULL );
-        Yaf\Registry::set('__IS_AUTHORIZED', FALSE);
-        Yaf\Registry::set(          '__APP', FALSE);
-        Yaf\Registry::set(         '__CONF', FALSE);
-        Yaf\Registry::set(     '__TMP_DATA', NULL );
-        Yaf\Registry::set(     '__RAW_DATA', NULL );
-        Yaf\Registry::set(     '__RESPONSE', NULL );
+        \Data\GVAR::set(        '__REQUEST', []);
+        \Data\GVAR::set(  '__IS_AUTHORIZED', FALSE);
+        \Data\GVAR::set(            '__APP', []);
+        \Data\GVAR::set(         '__CONFIG', []);
+        \Data\GVAR::set(       '__RAW_DATA', []);
+        \Data\GVAR::set(       '__RESPONSE', []);
     }
 
     public function _initPlugin(Yaf\Dispatcher $dispatcher) {
         //注册插件
-        $dispatcher->registerPlugin(new EnvPlugin());
+        //$dispatcher->registerPlugin(new RouterPlugin());
         $dispatcher->registerPlugin(new ConstPlugin());
-        $dispatcher->registerPlugin(new InitPlugin());
         $dispatcher->registerPlugin(new SecurityPlugin());
-
         $dispatcher->registerPlugin(new DevelPlugin());
     }
 
     public function _initHooks(Yaf\Dispatcher $dispatcher) {
         //注册Hooks
-        $dispatcher->registerPlugin(new \Hook\RequestPlugin());
-        $dispatcher->registerPlugin(new \Hook\AuthenticatePlugin());
-        $dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
-        $dispatcher->registerPlugin(new \Hook\FetchDataPlugin());
+        //$dispatcher->registerPlugin(new \Hook\RequestPlugin());
+        //$dispatcher->registerPlugin(new \Hook\AuthenticatePlugin());
+        //$dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
+        //$dispatcher->registerPlugin(new \Hook\FetchDataPlugin());
         //$dispatcher->registerPlugin(new \Hook\ExtraDataPlugin());
-        $dispatcher->registerPlugin(new \Hook\ResponsePlugin());
+        //$dispatcher->registerPlugin(new \Hook\ResponsePlugin());
         //$dispatcher->registerPlugin(new \Hook\PostEventPlugin());
     }
 	
@@ -72,7 +71,7 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
 	 * @since	2012-03-26
 	 * @param	unknown_type $type
 	 */
-	private function _import ($file_path) {
+    private function _import ($file_path) {
 
         $file_list      =   [];
 
@@ -82,17 +81,12 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
             $file_list  =   glob($file_path . DIRECTORY_SEPARATOR . '*.php');
         }
 
-		$file_path      =   \Yaf\Registry::get('config')->get('application')->library . DIRECTORY_SEPARATOR . $file_path;
+        $file_path      =   \Yaf\Loader::getInstance()->getLibraryPath(FALSE) . DIRECTORY_SEPARATOR . $file_path;
 
         if (file_exists($file_path)) {
             $file_list  =   array_merge($file_list, glob($file_path . DIRECTORY_SEPARATOR . '*.php'));
         }
 
-		foreach($file_list as $v) \Yaf\Loader::import($v);
-	}
-
-
-    private function _autoload($class_name) {
-
+        foreach($file_list as $v) \Yaf\Loader::import($v);
     }
 }
