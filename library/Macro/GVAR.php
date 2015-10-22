@@ -6,7 +6,7 @@
  * Time: 下午3:34
  */
 
-namespace Data;
+namespace Macro;
 
 
 class GVAR

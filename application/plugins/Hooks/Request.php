@@ -8,16 +8,18 @@
  * Date    2013-11-22
  * Time    20:36
  */
-namespace Hook;
+namespace Hooks;
 
 class RequestPlugin extends \Yaf\Plugin_Abstract {
 
 	public function routerShutdown(\Yaf\Request_Abstract $request, \Yaf\Response_Abstract $response) {
 
 		//PRETREATMENT REQUEST START -->
-		if ($request->controller == 'Ads') {
+		if (\C::IS_ADS_ROUTE()) {
 
-            \Yaf\Registry::set('__REQUEST', \Process\RequestModel::get($request->method, $_SERVER['REQUEST_URI']));
+			t('OK');
+			\C::GVAR('__REQUEST',$request);
+            //\Yaf\Registry::set('__REQUEST', \Process\RequestModel::get($request->method, $_SERVER['REQUEST_URI']));
 
         }
 		//PRETREATMENT REQUEST END <--

@@ -37,12 +37,12 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
 
     public function _initGlobalVariable(Yaf\Dispatcher $dispatcher) {
         //初始化预定于变量
-        \Data\GVAR::set(        '__REQUEST', []);
-        \Data\GVAR::set(  '__IS_AUTHORIZED', FALSE);
-        \Data\GVAR::set(            '__APP', []);
-        \Data\GVAR::set(         '__CONFIG', []);
-        \Data\GVAR::set(       '__RAW_DATA', []);
-        \Data\GVAR::set(       '__RESPONSE', []);
+        C::GVAR(        '__REQUEST', []);
+        C::GVAR(  '__IS_AUTHORIZED', FALSE);
+        C::GVAR(            '__APP', []);
+        C::GVAR(         '__CONFIG', []);
+        C::GVAR(       '__RAW_DATA', []);
+        C::GVAR(       '__RESPONSE', []);
     }
 
     public function _initPlugin(Yaf\Dispatcher $dispatcher) {
@@ -55,6 +55,12 @@ class Bootstrap extends Yaf\Bootstrap_Abstract{
 
     public function _initHooks(Yaf\Dispatcher $dispatcher) {
         //注册Hooks
+        HOOKPlugin::register(
+            [
+                'Request'
+            ],
+            $dispatcher
+        );
         //$dispatcher->registerPlugin(new \Hook\RequestPlugin());
         //$dispatcher->registerPlugin(new \Hook\AuthenticatePlugin());
         //$dispatcher->registerPlugin(new \Hook\ParseConfigPlugin());
